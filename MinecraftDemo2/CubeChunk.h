@@ -2,32 +2,34 @@
 #include "CubeRenderer.h"
 #include "CubeUtils.h"
 #include "TextureManager.h"
+#include "Voxel.h"
 #include <bitmap/bitmap_image.hpp>
 
 class CubeChunk
 {
 private:
+	Voxel Cubes[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE];
+	bool CubeFaces[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * NUM_OF_SIDES];
 	CubeRenderer cubeRenderer;
+
+	Voxel getVoxel(int, int, int);
+	void setVoxel(int, int, int, Voxel&);
+
+	bool getVoxelFace(int, int, int, int);
+	void setVoxelFace(int, int, int, int, bool);
 	
-	CubeData Cubes[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE];
-	bool mask[CHUNK_SIZE][CHUNK_SIZE][CHUNK_SIZE][6] = { false };
-
-	CubeChunk *neighborChunks[6]; // 6 faces
-
 	bool isVisibleSide(int, int, int, int);
-	Cube::CUBESIDE getCubeSide(int);
-	float* getTexCoord(CubeType, int);
+
+	//meshing algorithm
+	void stupid();
+	void culling();
+	void greedy();
 
 public:
 	CubeChunk();
 
-	bool hasChanged = true;
+	void Generate();
 
-	void AddBlock(int,int,int);
-	void RemoveBlock();
-	CubeType HasBlock(int,int,int);
-
-	void GenerateTerrain(const char*);
 	void Update();
 };
 

@@ -11,21 +11,22 @@ Game::~Game()
 void Game::Init()
 {
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 #ifdef WIREFRAME_DEBUG
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 #endif // WIREFRAME_DEBUG
 
 	//load everything (texture, shader .v.v)
-	TexturePiece grass_side = { "grass_side",3,0 };
-	TexturePiece grass_top = { "grass_top",8,2 };
-	TexturePiece grass_bottom = { "grass_bottom",2,0 };
-	TexturePiece rock = { "rock",0,0 };
+	TexturePiece grass_side = { "grass_side",12,15 };
+	TexturePiece grass_top = { "grass_top",7,13 };
+	TexturePiece grass_bottom = { "grass_bottom",13,15 };
+	TexturePiece rock = { "rock",14,15 };
 	TexturePiece pieces[] = { grass_side,grass_top,grass_bottom,rock };
-	TextureManager::LoadTextureCoordAtlas("C:\\Users\\buiqu\\Downloads\\assets\\textures\\minecraft_textures_all_resized.png", 15, 15, "texture_atlas", pieces, 4);
+	TextureManager::LoadTextureCoordAtlas("C:\\Users\\buiqu\\Downloads\\assets\\textures\\imageedit_2_3831088975.png", 15, 15, "texture_atlas", pieces, 4);
 	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
 
-	chunk.GenerateTerrain("C:\\Users\\buiqu\\Downloads\\rsz_heightmap_1.bmp");
+	chunk.Generate();
 }
 
 void Game::Destroy()
@@ -61,7 +62,7 @@ void Game::Update()
 
 void Game::Render()
 {
-	glClearColor(1.0f, 0.5f, 1.0f, 1.0f);
+	glClearColor(0.2f, 0.6f, 0.85f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	//adjust camer

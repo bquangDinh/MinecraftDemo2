@@ -15,7 +15,7 @@ public:
 	CubeRenderer();
 	~CubeRenderer();
 
-	void AddVerticleToVBO(Cube::CUBESIDE side,glm::vec3 position, float* texUV);
+	void AddVerticleToVBO(int side,glm::vec3 position, int type);
 	void GenerateVBO();
 	void Render();
 private:
@@ -25,6 +25,7 @@ private:
 	int count = -1;
 	int faceCount = 0;
 	GLuint EBO;
-	const float* getCudeSide(Cube::CUBESIDE side);
+	const float* getCudeSide(int side);
+	const float* getCubeTexCoord(int side, int type);
 };
 

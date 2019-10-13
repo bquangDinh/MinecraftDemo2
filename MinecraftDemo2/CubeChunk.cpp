@@ -1,211 +1,210 @@
 #include "CubeChunk.h"
 
+Voxel CubeChunk::getVoxel(int x, int y, int z)
+{
+	return this->Cubes[z + CHUNK_SIZE * (y + CHUNK_SIZE * x)];
+}
+
+void CubeChunk::setVoxel(int x, int y, int z, Voxel& cube)
+{
+	this->Cubes[z + CHUNK_SIZE * (y + CHUNK_SIZE * x)] = cube;
+}
+
+bool CubeChunk::getVoxelFace(int x, int y, int z, int side)
+{
+	return this->CubeFaces[side + NUM_OF_SIDES * (z + CHUNK_SIZE * (y + CHUNK_SIZE * x))];
+}
+
+void CubeChunk::setVoxelFace(int x, int y, int z, int side, bool value)
+{
+	this->CubeFaces[side + NUM_OF_SIDES * (z + CHUNK_SIZE * (y + CHUNK_SIZE * x))] = value;
+}
+
 bool CubeChunk::isVisibleSide(int x, int y, int z, int side)
 {
-	if (this->Cubes[x][y][z].cubeType.type == AIR_BLOCK) return false;
+	if (this->getVoxel(x, y, z).type == AIR_BLOCK) return false;
 
-	switch (side)
-	{
-	case FRONTSIDE:
+	if (side == FRONTSIDE) {
 		if (z == CHUNK_SIZE - 1) {
+			//at edge
 			return true;
 		}
 		else {
-			if (this->Cubes[x][y][z - 1].cubeType.type == AIR_BLOCK) {
+			if (getVoxel(x, y, z + 1).type == AIR_BLOCK) {
 				return true;
 			}
+			else {
+				return false;
+			}
 		}
-		return false;
-	case BACKSIDE:
+	}
+	else if (side == BACKSIDE) {
 		if (z == 0) {
 			return true;
 		}
 		else {
-			if (this->Cubes[x][y][z + 1].cubeType.type == AIR_BLOCK) {
+			if (getVoxel(x, y, z - 1).type == AIR_BLOCK) {
 				return true;
 			}
+			else {
+				return false;
+			}
 		}
-		return false;
-	case LEFTSIDE:
+	}
+	else if (side == LEFTSIDE) {
 		if (x == 0) {
 			return true;
 		}
 		else {
-			if (this->Cubes[x - 1][y][z].cubeType.type == AIR_BLOCK) {
+			if (getVoxel(x - 1, y, z).type == AIR_BLOCK) {
 				return true;
 			}
+			else {
+				return false;
+			}
 		}
-		break;
-	case RIGHTSIDE:
-		if (x == 300 - 1) {
+	}
+	else if (side == RIGHTSIDE) {
+		if (x == CHUNK_SIZE - 1) {
 			return true;
 		}
 		else {
-			if (this->Cubes[x + 1][y][z].cubeType.type == AIR_BLOCK) {
+			if (getVoxel(x + 1, y, z).type == AIR_BLOCK) {
 				return true;
 			}
+			else {
+				return false;
+			}
 		}
-		return false;
-	case TOPSIDE:
-		if (y == 144 - 1) {
+	}
+	else if (side == TOPSIDE) {
+		if (y == CHUNK_SIZE - 1) {
 			return true;
 		}
 		else {
-			if (this->Cubes[x][y + 1][z].cubeType.type == AIR_BLOCK) {
+			if (getVoxel(x, y + 1, z).type == AIR_BLOCK) {
 				return true;
 			}
+			else {
+				return false;
+			}
 		}
-		return false;
-	case BOTTOMSIDE:
+	}
+	else if (side == BOTTOMSIDE) {
 		if (y == 0) {
 			return true;
 		}
 		else {
-			if (this->Cubes[x][y - 1][z].cubeType.type == AIR_BLOCK) {
+			if (getVoxel(x, y - 1, z).type == AIR_BLOCK) {
 				return true;
 			}
+			else {
+				return false;
+			}
 		}
-		return false;
 	}
+
 	return false;
 }
 
-Cube::CUBESIDE CubeChunk::getCubeSide(int side)
+void CubeChunk::stupid()
 {
-	Cube::CUBESIDE cSide;
-	switch (side)
-	{
-	case FRONTSIDE:
-		cSide = Cube::CUBESIDE::FRONT;
-		break;
-	case BACKSIDE:
-		cSide = Cube::CUBESIDE::BACK;
-		break;
-	case LEFTSIDE:
-		cSide = Cube::CUBESIDE::LEFT;
-		break;
-	case RIGHTSIDE:
-		cSide = Cube::CUBESIDE::RIGHT;
-		break;
-	case TOPSIDE:
-		cSide = Cube::CUBESIDE::TOP;
-		break;
-	case BOTTOMSIDE:
-		cSide = Cube::CUBESIDE::BOTTOM;
-		break;
+	for (int side = 0; side < NUM_OF_SIDES; side++) {
+		for (int x = 0; x < CHUNK_SIZE; x++) {
+			for (int y = 0; y < CHUNK_SIZE; y++) {
+				for (int z = 0; z < CHUNK_SIZE; z++) {
+					if (this->getVoxel(x, z, y).type != AIR_BLOCK) {
+						this->setVoxelFace(x, z, y, side, true);
+					}
+				}
+			}
+		}
 	}
-	return cSide;
 }
 
-float* CubeChunk::getTexCoord(CubeType ctype,int side)
+void CubeChunk::culling()
 {
-	float* texPointer = NULL;
+	for (int side = 0; side < NUM_OF_SIDES; side++) {
+		for (int x = 0; x < CHUNK_SIZE; x++) {
+			for (int y = 0; y < CHUNK_SIZE; y++) {
+				for (int z = 0; z < CHUNK_SIZE; z++) {
+					if (this->isVisibleSide(x, z, y, side) == true) {
+						this->setVoxelFace(x, z, y, side, true);
+					}
+					else {
+						this->setVoxelFace(x, z, y, side, false);
+					}
+				}
+			}
+		}
+	}
+}
 
-	if (side == FRONTSIDE || side == BACKSIDE || side == LEFTSIDE || side == RIGHTSIDE) {
-		if (ctype.type == GRASS_BLOCK) {
-			texPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
-		}
-		if (ctype.type == ROCK_BLOCK) {
-			texPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
-		}
-	}
-	else if (side == TOPSIDE) {
-		if (ctype.type == GRASS_BLOCK) {
-			texPointer = TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
-		}
-		if (ctype.type == ROCK_BLOCK) {
-			texPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
-		}
-	}
-	else {
-		if (ctype.type == GRASS_BLOCK) {
-			texPointer = TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
-		}
-		if (ctype.type == ROCK_BLOCK) {
-			texPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
-		}
-	}
+void CubeChunk::greedy()
+{
 
-	return texPointer;
 }
 
 CubeChunk::CubeChunk()
 {
-	
-}
-
-void CubeChunk::AddBlock(int x, int y, int z)
-{
-}
-
-CubeType CubeChunk::HasBlock(int x, int y, int z)
-{
-	return CubeType();
-}
-
-void CubeChunk::GenerateTerrain(const char* heightmap)
-{
-	cout << "Reading Height Map..." << endl;
-
-	bitmap_image heightData(heightmap);
+	bitmap_image heightData("C:\\Users\\buiqu\\Downloads\\rsz_heightmap_2.bmp");
 
 	if (!heightData) {
-		cout << "Failed to load height map" << endl;
-		return;
+		cout << "Failed to read height map" << endl;
 	}
 
-	const unsigned int imgWidth = heightData.width();
-	const unsigned int imgHeight = heightData.height();
+	cout << "Width: " << heightData.width() << endl;
+	cout << "Height: " << heightData.height() << endl;
 
-	cout << "Height: " << imgHeight << " Width: " << imgWidth << endl;
-
-	cout << "Generating Terrain..." << endl;
-
-	for (int x = 0; x < imgWidth; x++) {
-		for (int y = 0; y < imgHeight; y++) {
-
+	for (int x = 0; x < CHUNK_SIZE; x++) {
+		for (int y = 0; y < CHUNK_SIZE; y++) {
 			rgb_t colour;
 			heightData.get_pixel(x, y, colour);
-			float r = colour.red;
-			r /= 255.0f;
-			int height = r * 15;
-			//cout << height << endl;
+			double red = colour.red / 255.0f;
+			int height = red * CHUNK_SIZE;
+			if (height == 0) height = 1;
 			for (int z = 0; z < CHUNK_SIZE; z++) {
-				if (z > height || height == 0) {
-					CubeType cubeType = { AIR_BLOCK };
-					Location cubeLocation = { x, y, z };
-					CubeData cubeData = { cubeLocation, cubeType };
-					this->Cubes[x][y][z] = cubeData;
+				if (z <= height) {
+					if (height >= GRASS_MIN_LIMIT && height <= GRASS_MAX_LIMIT) {
+						Voxel cube(true, GRASS_BLOCK);
+						this->setVoxel(x, z, y, cube);
+					}
+					else if (height >= ROCK_MIN_LIMIT && height <= ROCK_MAX_LIMIT) {
+						Voxel cube(true, ROCK_BLOCK);
+						this->setVoxel(x, z, y, cube);
+					}
 				}
 				else {
-					CubeType cubeType = { GRASS_BLOCK };
-					Location cubeLocation = { x, y, z };
-					CubeData cubeData = { cubeLocation, cubeType };
-					this->Cubes[x][y][z] = cubeData;
-				}			
+					Voxel cube(true, AIR_BLOCK);
+					this->setVoxel(x, z, y, cube);
+				}
 			}
 		}
 	}
+}
 
-	for (int x = 0; x < imgWidth; x++) {
-		for (int y = 0; y < imgHeight; y++) {
-			for (int z = 0; z < CHUNK_SIZE; z++) {
-				for (int side = 0; side < 6; side++) {
-					if (this->isVisibleSide(x, y, z, side) == true) {
-						this->cubeRenderer.AddVerticleToVBO(this->getCubeSide(side), glm::vec3(x, y, z), this->getTexCoord(this->Cubes[x][y][z].cubeType, side));
+void CubeChunk::Generate()
+{
+	this->culling();
+
+	for (int side = 0; side < NUM_OF_SIDES; side++) {
+		for (int x = 0; x < CHUNK_SIZE; x++) {
+			for (int y = 0; y < CHUNK_SIZE; y++) {
+				for (int z = 0; z < CHUNK_SIZE; z++) {
+					if (this->getVoxelFace(x, z, y, side) == true) {
+						this->cubeRenderer.AddVerticleToVBO(side, glm::vec3(x, z, y), this->getVoxel(x, z, y).type);
 					}
 				}
 			}
 		}
 	}
 
-	
-
 	this->cubeRenderer.GenerateVBO();
-	cout << "Done" << endl;
 }
 
 void CubeChunk::Update()
 {
 	this->cubeRenderer.Render();
 }
+
+

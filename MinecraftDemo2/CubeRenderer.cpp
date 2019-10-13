@@ -8,20 +8,55 @@ CubeRenderer::~CubeRenderer()
 {
 }
 
-void CubeRenderer::AddVerticleToVBO(Cube::CUBESIDE side, glm::vec3 position, float* texUV)
+void CubeRenderer::AddVerticleToVBO(int side, glm::vec3 position, int type)
 {
+	//cout << "side: " << side << " type: " << type << endl;
+
 	glm::mat4 model = glm::mat4(1.0f);
 	model = glm::translate(model, position);
+
 	const float* sideData = this->getCudeSide(side);
+	const float* texCoord = NULL;
+
+	if (side == 0 || side == 1 || side == 2 || side == 3) {
+		if (type == 1) {
+			//grass block
+			texCoord = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoord = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 4) {
+		if (type == 1) {
+			//grass block
+			texCoord = TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoord = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 5) {
+		if (type == 1) {
+			//grass block
+			texCoord = TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoord = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+
+	texCoord = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
 
 	int posIndex = -1;
 	int texCoordIndex = -1;
 
-	float* texCoord = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
-
 	const unsigned int* indicate = NULL;
 
-	if (side == Cube::CUBESIDE::FRONT || side == Cube::CUBESIDE::TOP || side == Cube::CUBESIDE::RIGHT) {
+	if (side == Cube::CUBESIDE::FRONT || side == Cube::CUBESIDE::TOP || side == Cube::CUBESIDE::LEFT) {
 		indicate = Cube::FRONT_INDICATES;
 	}
 	else {
@@ -93,28 +128,28 @@ void CubeRenderer::Render()
 	glDrawElements(GL_TRIANGLES, this->indicates.size(), GL_UNSIGNED_INT, (void*)0);
 }
 
-const float* CubeRenderer::getCudeSide(Cube::CUBESIDE side)
+const float* CubeRenderer::getCudeSide(int side)
 {
 	const float* sideData = NULL;
 
 	switch (side)
 	{
-	case Cube::FRONT:
+	case 0:
 		sideData = Cube::FRONTSIDE;
 		break;
-	case Cube::BACK:
+	case 1:
 		sideData = Cube::BACKSIDE;
 		break;
-	case Cube::TOP:
+	case 4:
 		sideData = Cube::TOPSIDE;
 		break;
-	case Cube::BOTTOM:
+	case 5:
 		sideData = Cube::BOTTOMSIDE;
 		break;
-	case Cube::LEFT:
+	case 2:
 		sideData = Cube::LEFTSIDE;
 		break;
-	case Cube::RIGHT:
+	case 3:
 		sideData = Cube::RIGHTSIDE;
 		break;
 	default:
@@ -122,5 +157,41 @@ const float* CubeRenderer::getCudeSide(Cube::CUBESIDE side)
 		break;
 	}
 	return sideData;
+}
+
+const float* CubeRenderer::getCubeTexCoord(int side, int type)
+{
+	if (side == 0 || side == 1 || side == 2 || side == 3) {
+		if (type == 1) {
+			//grass block
+			return TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			return TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 4) {
+		if (type == 1) {
+			//grass block
+			return TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			return TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 5) {
+		if (type == 1) {
+			//grass block
+			return TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			return TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+
+	return TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
 }
 

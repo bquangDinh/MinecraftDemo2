@@ -44,11 +44,11 @@ const float Cube::BOTTOMSIDE[12] = {
 
 
 const unsigned int Cube::FRONT_INDICATES[6] = {
-	0,1,3,
-	1,2,3
+	3,1,0,
+	3,2,1
 };
 
 const unsigned int Cube::BACK_INDICATES[6] = {
-	3,1,0,
-	3,2,1
+	0,1,3,
+	1,2,3
 };
