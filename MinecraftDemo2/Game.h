@@ -7,7 +7,7 @@
 #include "Camera.h"
 #include "CubeChunk.h"
 
-#define WIREFRAME_DEBUG
+//#define WIREFRAME_DEBUG
 
 enum GameState {
 	RUNNING,

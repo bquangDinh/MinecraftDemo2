@@ -4,6 +4,7 @@
 #include "ShaderManager.h"
 #include "TextureManager.h"
 #include <vector>
+#include "CubeType.h"
 
 typedef struct {
 	float x, y, z;
@@ -16,6 +17,7 @@ public:
 	~CubeRenderer();
 
 	void AddVerticleToVBO(int side,glm::vec3 position, int type);
+	void AddQuadToVBO(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, bool backface, int facetype, int side);
 	void GenerateVBO();
 	void Render();
 private:

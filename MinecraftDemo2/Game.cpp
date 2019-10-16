@@ -10,6 +10,8 @@ Game::~Game()
 
 void Game::Init()
 {
+	double firstTime = glfwGetTime();
+	cout << "Initialize..." << endl;
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
@@ -27,6 +29,9 @@ void Game::Init()
 	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
 
 	chunk.Generate();
+	double lastTime = glfwGetTime();
+	cout << "Done !" << endl;
+	cout << "Time to process: " << lastTime - firstTime << "s" << endl;
 }
 
 void Game::Destroy()
@@ -67,7 +72,7 @@ void Game::Render()
 
 	//adjust camer
 	glm::mat4 projection = glm::mat4(1.0f);
-	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 200.0f);
 
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("projection", projection);
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("view", mainCamera.getViewMatrix());

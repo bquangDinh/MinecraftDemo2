@@ -49,8 +49,6 @@ void CubeRenderer::AddVerticleToVBO(int side, glm::vec3 position, int type)
 		}
 	}
 
-	texCoord = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
-
 	int posIndex = -1;
 	int texCoordIndex = -1;
 
@@ -93,6 +91,64 @@ void CubeRenderer::AddVerticleToVBO(int side, glm::vec3 position, int type)
 	for (int i = 0; i < 6; i++) {
 		this->indicates.push_back(*(indicate + i) + 4 * this->faceCount);
 	}
+
+	this->faceCount++;
+}
+
+void CubeRenderer::AddQuadToVBO(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4,bool backface, int typeface, int side)
+{
+	//determine the indicates if that face is either backface or frontface
+	if (backface == false) {
+		//front face
+		this->indicates.push_back(3 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(0 + 4 * this->faceCount);
+
+		this->indicates.push_back(3 + 4 * this->faceCount);
+		this->indicates.push_back(2 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+	}
+	else {
+		//back face
+		this->indicates.push_back(0 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(3 + 4 * this->faceCount);
+
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(2 + 4 * this->faceCount);
+		this->indicates.push_back(3 + 4 * this->faceCount);
+	}
+
+	//determine the texure coord
+	const float* texCoord = this->getCubeTexCoord(side, typeface);
+
+	this->verticles.push_back(p1.x);
+	this->verticles.push_back(p1.y);
+	this->verticles.push_back(p1.z);
+
+	this->verticles.push_back(*(texCoord + 0));
+	this->verticles.push_back(*(texCoord + 0));
+
+	this->verticles.push_back(p2.x);
+	this->verticles.push_back(p2.y);
+	this->verticles.push_back(p2.z);
+
+	this->verticles.push_back(*(texCoord + 1));
+	this->verticles.push_back(*(texCoord + 1));
+
+	this->verticles.push_back(p3.x);
+	this->verticles.push_back(p3.y);
+	this->verticles.push_back(p3.z);
+
+	this->verticles.push_back(*(texCoord + 2));
+	this->verticles.push_back(*(texCoord + 2));
+
+	this->verticles.push_back(p4.x);
+	this->verticles.push_back(p4.y);
+	this->verticles.push_back(p4.z);
+
+	this->verticles.push_back(*(texCoord + 3));
+	this->verticles.push_back(*(texCoord + 3));
 
 	this->faceCount++;
 }
@@ -161,37 +217,43 @@ const float* CubeRenderer::getCudeSide(int side)
 
 const float* CubeRenderer::getCubeTexCoord(int side, int type)
 {
+	const float* texCoordPointer = NULL;
+
 	if (side == 0 || side == 1 || side == 2 || side == 3) {
 		if (type == 1) {
 			//grass block
-			return TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
 		}
 		else if (type == 2) {
 			//grass block
-			return TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
 		}
 	}
 	else if (side == 4) {
 		if (type == 1) {
 			//grass block
-			return TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
 		}
 		else if (type == 2) {
 			//grass block
-			return TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
 		}
 	}
 	else if (side == 5) {
 		if (type == 1) {
 			//grass block
-			return TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
 		}
 		else if (type == 2) {
 			//grass block
-			return TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
 		}
 	}
 
-	return TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+	if (texCoordPointer == NULL) {
+		texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+	}
+
+	return texCoordPointer;
 }
 

@@ -185,6 +185,8 @@ CubeChunk::CubeChunk()
 
 void CubeChunk::Generate()
 {
+	cout << "Generating Terrain Data..." << endl;
+
 	this->culling();
 
 	for (int side = 0; side < NUM_OF_SIDES; side++) {
@@ -200,6 +202,7 @@ void CubeChunk::Generate()
 	}
 
 	this->cubeRenderer.GenerateVBO();
+	cout << "Generated !" << endl;
 }
 
 void CubeChunk::Update()

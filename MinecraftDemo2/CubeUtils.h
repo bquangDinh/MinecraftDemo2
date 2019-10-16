@@ -1,4 +1,5 @@
 #pragma once
+#include "CubeType.h"
 
 #define CHUNK_SIZE 60
 #define NUM_OF_SIDES 6
@@ -15,3 +16,5 @@
 #define RIGHTSIDE 3
 #define TOPSIDE 4
 #define BOTTOMSIDE 5
+
+

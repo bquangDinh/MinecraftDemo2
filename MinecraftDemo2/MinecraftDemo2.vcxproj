@@ -176,6 +176,7 @@
     <ClInclude Include="Cube.h" />
     <ClInclude Include="CubeChunk.h" />
     <ClInclude Include="CubeRenderer.h" />
+    <ClInclude Include="CubeType.h" />
     <ClInclude Include="CubeUtils.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="Game.h" />
