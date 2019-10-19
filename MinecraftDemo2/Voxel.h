@@ -1,6 +1,6 @@
 #pragma once
 
-
+#include "CubeUtils.h"
 
 class Voxel
 {

@@ -4,6 +4,7 @@
 #include "TextureManager.h"
 #include "Game.h"
 #include "Terrain.h"
+#include <thread>
 
 using namespace std;
 

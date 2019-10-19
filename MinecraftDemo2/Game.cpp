@@ -12,6 +12,7 @@ void Game::Init()
 {
 	double firstTime = glfwGetTime();
 	cout << "Initialize..." << endl;
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
@@ -28,7 +29,8 @@ void Game::Init()
 	TextureManager::LoadTextureCoordAtlas("C:\\Users\\buiqu\\Downloads\\assets\\textures\\imageedit_2_3831088975.png", 15, 15, "texture_atlas", pieces, 4);
 	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
 
-	chunk.Generate();
+	chunkManager.Init();
+
 	double lastTime = glfwGetTime();
 	cout << "Done !" << endl;
 	cout << "Time to process: " << lastTime - firstTime << "s" << endl;
@@ -77,5 +79,5 @@ void Game::Render()
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("projection", projection);
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("view", mainCamera.getViewMatrix());
 
-	chunk.Update();
+	chunkManager.Update();
 }

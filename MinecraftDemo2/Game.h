@@ -5,7 +5,7 @@
 #include "ShaderManager.h"
 #include "CubeRenderer.h"
 #include "Camera.h"
-#include "CubeChunk.h"
+#include "ChunkManager.h"
 
 //#define WIREFRAME_DEBUG
 
@@ -21,7 +21,8 @@ public:
 	GLboolean Keys[1024];
 	GLuint Width, Height;
 	Camera mainCamera;
-	CubeChunk chunk;
+	ChunkManager chunkManager;
+	CubeChunk c1, c2;
 	Game(GLuint, GLuint);
 	~Game();
 

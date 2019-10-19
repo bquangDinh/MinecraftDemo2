@@ -1,10 +1,10 @@
 #pragma once
-#include "Cube.h"
 #include <glad/glad.h>
 #include "ShaderManager.h"
 #include "TextureManager.h"
+#include "CubeUtils.h"
+#include "Quad.h"
 #include <vector>
-#include "CubeType.h"
 
 typedef struct {
 	float x, y, z;
@@ -16,8 +16,7 @@ public:
 	CubeRenderer();
 	~CubeRenderer();
 
-	void AddVerticleToVBO(int side,glm::vec3 position, int type);
-	void AddQuadToVBO(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, bool backface, int facetype, int side);
+	void AddQuadToVBO(Quad);
 	void GenerateVBO();
 	void Render();
 private:
@@ -27,7 +26,6 @@ private:
 	int count = -1;
 	int faceCount = 0;
 	GLuint EBO;
-	const float* getCudeSide(int side);
 	const float* getCubeTexCoord(int side, int type);
 };
 
