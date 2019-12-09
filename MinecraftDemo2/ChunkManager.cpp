@@ -8,7 +8,7 @@ CubeChunk* ChunkManager::getChunk(int x, int z)
 CubeChunk* ChunkManager::setChunk(int x, int z)
 {
 	CubeChunk* chunk = this->getChunk(x, z);
-	chunk->Init(glm::vec3(x * CHUNK_SIZE, 0, z * CHUNK_SIZE), this->heightmap, x, z);
+	chunk->Init(glm::vec3(x * CHUNK_SIZE, 0, z * CHUNK_SIZE));
 	return chunk;
 }
 
@@ -53,7 +53,6 @@ void ChunkManager::GenerateHeightMap()
 		for (int z = 0; z < WORLD_CHUNK_COUNT * CHUNK_SIZE; z++) {
 			int height = rand() % 15 + 1;
 			this->setHeightAt(x, z, height);
-			//cout << height << endl;
 		}
 	}
 }
@@ -76,7 +75,7 @@ ChunkManager::ChunkManager()
 
 void ChunkManager::Init()
 {
-	this->GenerateHeightMap();
+	//this->GenerateHeightMap();
 
 	for (int x = 0; x < WORLD_CHUNK_COUNT; x++) {
 		for (int z = 0; z < WORLD_CHUNK_COUNT; z++) {
@@ -92,7 +91,15 @@ void ChunkManager::Init()
 		}
 	}
 
-	cout << "Generate process" << endl;
+	cout << "Meshing..." << endl;
+
+	for (int x = 0; x < WORLD_CHUNK_COUNT; x++) {
+		for (int z = 0; z < WORLD_CHUNK_COUNT; z++) {
+			this->getChunk(x, z)->DoMeshing();
+		}
+	}
+
+	cout << "Generating..." << endl;
 
 	for (int x = 0; x < WORLD_CHUNK_COUNT; x++) {
 		for (int z = 0; z < WORLD_CHUNK_COUNT; z++) {

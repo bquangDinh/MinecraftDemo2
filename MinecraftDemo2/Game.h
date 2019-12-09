@@ -39,5 +39,6 @@ public:
 
 	//Render to screen
 	void Render();
+	void ViewRender();
 };
 

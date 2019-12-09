@@ -70,7 +70,7 @@ int main()
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
-	
+
 	glfwTerminate();
 	myGame.Destroy();
 	return 0;

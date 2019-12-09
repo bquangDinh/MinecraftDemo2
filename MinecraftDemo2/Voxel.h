@@ -12,5 +12,6 @@ public:
 	Voxel(bool, int);
 
 	bool equals(Voxel);
+	bool isSolid();
 };
 

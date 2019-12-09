@@ -65,6 +65,7 @@ void Game::ProcessMouseInput(double xPos, double yPos)
 
 void Game::Update()
 {
+
 }
 
 void Game::Render()
@@ -80,4 +81,9 @@ void Game::Render()
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("view", mainCamera.getViewMatrix());
 
 	chunkManager.Update();
+}
+
+void Game::ViewRender()
+{
+	
 }

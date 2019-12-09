@@ -7,7 +7,7 @@
 #include <cstdlib>
 
 #define WORLD_WIDTH 2 // 10 chunks
-#define WORLD_CHUNK_COUNT 16
+#define WORLD_CHUNK_COUNT 1
 
 class ChunkManager
 {
@@ -23,6 +23,7 @@ private:
 	int getHeightAt(int x, int z);
 	void setHeightAt(int x, int z, int height);
 public:
+
 	ChunkManager();
 
 	void Init();

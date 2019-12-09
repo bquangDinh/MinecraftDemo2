@@ -1,7 +1,7 @@
 #pragma once
 #include "CubeType.h"
 
-#define CHUNK_SIZE 16
+#define CHUNK_SIZE 4
 #define NUM_OF_SIDES 6
 
 #define GRASS_MIN_LIMIT 14
@@ -12,8 +12,8 @@
 
 #define FRONTSIDE 0
 #define BACKSIDE 1
-#define LEFTSIDE 2
-#define RIGHTSIDE 3
+#define RIGHTSIDE 2
+#define LEFTSIDE 3
 #define TOPSIDE 4
 #define BOTTOMSIDE 5
 
