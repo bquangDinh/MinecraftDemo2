@@ -62,6 +62,5 @@ void Camera::TurnAround(float mouseXPos, float mouseYPos)
 	front.x = glm::cos(glm::radians(this->yaw)) + glm::cos(glm::radians(this->pitch));
 	front.y = glm::sin(glm::radians(this->pitch));
 	front.z = glm::cos(glm::radians(this->pitch)) + glm::sin(glm::radians(this->yaw));
-
 	this->cameraFront = glm::normalize(front);
 }

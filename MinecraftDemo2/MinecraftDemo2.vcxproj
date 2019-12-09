@@ -156,6 +156,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\OneDrive\Desktop\Projects\OpenGLSources\glad.c" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="ChunkManager.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="CubeChunk.cpp" />
     <ClCompile Include="CubeRenderer.cpp" />
@@ -163,6 +164,7 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MinecraftDemo2.cpp" />
+    <ClCompile Include="Quad.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
@@ -173,13 +175,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ChunkManager.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="CubeChunk.h" />
     <ClInclude Include="CubeRenderer.h" />
+    <ClInclude Include="CubeType.h" />
     <ClInclude Include="CubeUtils.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Quad.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShaderProgram.h" />

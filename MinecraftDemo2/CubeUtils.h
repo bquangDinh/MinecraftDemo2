@@ -1,35 +1,22 @@
 #pragma once
+#include "CubeType.h"
 
-#define CHUNK_SIZE 16
+#define CHUNK_SIZE 4
+#define NUM_OF_SIDES 6
+
+#define GRASS_MIN_LIMIT 14
+#define GRASS_MAX_LIMIT 15
+
+#define ROCK_MIN_LIMIT 0
+#define ROCK_MAX_LIMIT 13
+
+#define FRONTSIDE 0
+#define BACKSIDE 1
+#define RIGHTSIDE 2
+#define LEFTSIDE 3
+#define TOPSIDE 4
+#define BOTTOMSIDE 5
 
 #define AIR_BLOCK 0
 #define GRASS_BLOCK 1
 #define ROCK_BLOCK 2
-
-#define GRASS_MIN_LIMIT 3
-#define GRASS_MAX_LIMIT 5
-
-#define ROCK_MIN_LIMIT 0
-#define ROCK_MAX_LIMIT 2
-
-#define FRONTSIDE 0
-#define BACKSIDE 1
-#define LEFTSIDE 2
-#define RIGHTSIDE 3
-#define TOPSIDE 4
-#define BOTTOMSIDE 5
-
-typedef struct {
-	int x;
-	int y;
-	int z;
-} Location;
-
-typedef struct {
-	unsigned int type;
-} CubeType;
-
-typedef struct {
-	Location cubeLocation;
-	CubeType cubeType;
-} CubeData;

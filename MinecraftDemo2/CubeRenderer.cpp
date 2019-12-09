@@ -8,63 +8,205 @@ CubeRenderer::~CubeRenderer()
 {
 }
 
-void CubeRenderer::AddVerticleToVBO(Cube::CUBESIDE side, glm::vec3 position, float* texUV)
+void CubeRenderer::AddQuadToVBO(Quad quad)
 {
-	glm::mat4 model = glm::mat4(1.0f);
-	model = glm::translate(model, position);
-	const float* sideData = this->getCudeSide(side);
+	if (quad.direction == FRONTSIDE || quad.direction == TOPSIDE || quad.direction == LEFTSIDE) {
+		this->indicates.push_back(3 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(0 + 4 * this->faceCount);
 
-	int posIndex = -1;
-	int texCoordIndex = -1;
-
-	float* texCoord = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
-
-	const unsigned int* indicate = NULL;
-
-	if (side == Cube::CUBESIDE::FRONT || side == Cube::CUBESIDE::TOP || side == Cube::CUBESIDE::RIGHT) {
-		indicate = Cube::FRONT_INDICATES;
+		this->indicates.push_back(3 + 4 * this->faceCount);
+		this->indicates.push_back(2 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
 	}
 	else {
-		indicate = Cube::BACK_INDICATES;
-	}
+		this->indicates.push_back(0 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(3 + 4 * this->faceCount);
 
-	for (int i = 0; i < 4; i++) {
-		// 6 verticles of a cube ==> (x,y,z)(u,v) x 6
-		float x = *(sideData + ++posIndex);
-		float y = *(sideData + ++posIndex);
-		float z = *(sideData + ++posIndex);
-		float u = *(texCoord + ++texCoordIndex);
-		float v = *(texCoord + ++texCoordIndex);
-
-		glm::vec4 pos = glm::vec4(x, y, z, 1.0f);
-		pos = model * pos; // after translating
-
-		//Vertex vertex = { pos.x, pos.y, pos.z };
-
-		this->verticles.push_back(pos.x);
-		//cout << "x: " << this->verticles[++count];
-		this->verticles.push_back(pos.y);
-		//cout << " y: " << this->verticles[++count];
-		this->verticles.push_back(pos.z);
-		//cout << " z: " << this->verticles[++count];
-		this->verticles.push_back(u);
-		//cout << " u: " << this->verticles[++count];
-		this->verticles.push_back(v);
-		//cout << " v: " << this->verticles[++count];
-		//cout << endl;
-		
-	}
-
-	for (int i = 0; i < 6; i++) {
-		this->indicates.push_back(*(indicate + i) + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(2 + 4 * this->faceCount);
+		this->indicates.push_back(3 + 4 * this->faceCount);
 	}
 
 	this->faceCount++;
+
+	const float* texCoordPointer = NULL;
+	int side = quad.direction;
+	int type = quad.type;
+
+	if (side == 0 || side == 1 || side == 2 || side == 3) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 4) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 5) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+
+	if (texCoordPointer == NULL) {
+		texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+	}
+
+	this->verticles.push_back(quad.p1.x);
+	this->verticles.push_back(quad.p1.y);
+	this->verticles.push_back(quad.p1.z);
+	//cout << "x: " << quad.p1.x << " y: " << quad.p1.y << " z: " << quad.p1.z << endl;
+
+	this->verticles.push_back(*(texCoordPointer + 0));
+	this->verticles.push_back(*(texCoordPointer + 1));
+	//cout << "u: " << *(texCoordPointer + 0) << " v: " << *(texCoordPointer + 1) << endl;
+
+	this->verticles.push_back(quad.p2.x);
+	this->verticles.push_back(quad.p2.y);
+	this->verticles.push_back(quad.p2.z);
+	//cout << "x: " << quad.p2.x << " y: " << quad.p2.y << " z: " << quad.p2.z << endl;
+
+	this->verticles.push_back(*(texCoordPointer + 2));
+	this->verticles.push_back(*(texCoordPointer + 3));
+
+	this->verticles.push_back(quad.p3.x);
+	this->verticles.push_back(quad.p3.y);
+	this->verticles.push_back(quad.p3.z);
+	//cout << "x: " << quad.p3.x << " y: " << quad.p3.y << " z: " << quad.p3.z << endl;
+
+	this->verticles.push_back(*(texCoordPointer + 4));
+	this->verticles.push_back(*(texCoordPointer + 5));
+
+	this->verticles.push_back(quad.p4.x);
+	this->verticles.push_back(quad.p4.y);
+	this->verticles.push_back(quad.p4.z);
+	//cout << "x: " << quad.p4.x << " y: " << quad.p4.y << " z: " << quad.p4.z << endl;
+
+	this->verticles.push_back(*(texCoordPointer + 6));
+	this->verticles.push_back(*(texCoordPointer + 7));
+}
+
+void CubeRenderer::AddQuadToVBO(Quad quad, bool backFace)
+{
+	if (!backFace) {
+		this->indicates.push_back(0 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(3 + 4 * this->faceCount);
+
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(2 + 4 * this->faceCount);
+		this->indicates.push_back(3 + 4 * this->faceCount);
+	}
+	else {
+		this->indicates.push_back(3 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+		this->indicates.push_back(0 + 4 * this->faceCount);
+
+		this->indicates.push_back(3 + 4 * this->faceCount);
+		this->indicates.push_back(2 + 4 * this->faceCount);
+		this->indicates.push_back(1 + 4 * this->faceCount);
+	}
+
+	this->faceCount++;
+
+	const float* texCoordPointer = NULL;
+	int side = quad.direction;
+	int type = quad.type;
+
+	if (side == 0 || side == 1 || side == 2 || side == 3) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 4) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 5) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+
+	if (texCoordPointer == NULL) {
+		texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+	}
+
+	this->verticles.push_back(quad.p1.x);
+	this->verticles.push_back(quad.p1.y);
+	this->verticles.push_back(quad.p1.z);
+	//cout << "x: " << quad.p1.x << " y: " << quad.p1.y << " z: " << quad.p1.z << endl;
+
+	this->verticles.push_back(*(texCoordPointer + 0));
+	this->verticles.push_back(*(texCoordPointer + 1));
+	//cout << "u: " << *(texCoordPointer + 0) << " v: " << *(texCoordPointer + 1) << endl;
+
+	this->verticles.push_back(quad.p2.x);
+	this->verticles.push_back(quad.p2.y);
+	this->verticles.push_back(quad.p2.z);
+	//cout << "x: " << quad.p2.x << " y: " << quad.p2.y << " z: " << quad.p2.z << endl;
+
+	this->verticles.push_back(*(texCoordPointer + 2));
+	this->verticles.push_back(*(texCoordPointer + 3));
+
+	this->verticles.push_back(quad.p3.x);
+	this->verticles.push_back(quad.p3.y);
+	this->verticles.push_back(quad.p3.z);
+	//cout << "x: " << quad.p3.x << " y: " << quad.p3.y << " z: " << quad.p3.z << endl;
+
+	this->verticles.push_back(*(texCoordPointer + 4));
+	this->verticles.push_back(*(texCoordPointer + 5));
+
+	this->verticles.push_back(quad.p4.x);
+	this->verticles.push_back(quad.p4.y);
+	this->verticles.push_back(quad.p4.z);
+	//cout << "x: " << quad.p4.x << " y: " << quad.p4.y << " z: " << quad.p4.z << endl;
+
+	this->verticles.push_back(*(texCoordPointer + 6));
+	this->verticles.push_back(*(texCoordPointer + 7));
 }
 
 void CubeRenderer::GenerateVBO()
 {
-	glGenVertexArrays(1,&this->VAO);
+	cout << "Face count: " << this->faceCount << endl;
+	cout << "Verticles: " << this->faceCount * 4 << endl;
+
+	//cout << "Generate VBO" << endl;
+	glGenVertexArrays(1, &this->VAO);
 	glBindVertexArray(VAO);
 
 	GLuint VBO;
@@ -81,8 +223,20 @@ void CubeRenderer::GenerateVBO()
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 
+	//for uv
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	this->VBO = VBO;
+	this->EBO = EBO;
+
+	cout << "VBO: " << this->VBO << " | EBO: " << this->EBO << endl;
+}
+
+void CubeRenderer::GenerateVAO()
+{
+	glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->EBO);
 }
 
 void CubeRenderer::Render()
@@ -93,34 +247,45 @@ void CubeRenderer::Render()
 	glDrawElements(GL_TRIANGLES, this->indicates.size(), GL_UNSIGNED_INT, (void*)0);
 }
 
-const float* CubeRenderer::getCudeSide(Cube::CUBESIDE side)
+const float* CubeRenderer::getCubeTexCoord(int side, int type)
 {
-	const float* sideData = NULL;
+	const float* texCoordPointer = NULL;
 
-	switch (side)
-	{
-	case Cube::FRONT:
-		sideData = Cube::FRONTSIDE;
-		break;
-	case Cube::BACK:
-		sideData = Cube::BACKSIDE;
-		break;
-	case Cube::TOP:
-		sideData = Cube::TOPSIDE;
-		break;
-	case Cube::BOTTOM:
-		sideData = Cube::BOTTOMSIDE;
-		break;
-	case Cube::LEFT:
-		sideData = Cube::LEFTSIDE;
-		break;
-	case Cube::RIGHT:
-		sideData = Cube::RIGHTSIDE;
-		break;
-	default:
-		sideData = NULL;
-		break;
+	if (side == 0 || side == 1 || side == 2 || side == 3) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
 	}
-	return sideData;
+	else if (side == 4) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+	else if (side == 5) {
+		if (type == 1) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
+		}
+		else if (type == 2) {
+			//grass block
+			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		}
+	}
+
+	if (texCoordPointer == NULL) {
+		texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+	}
+
+	return texCoordPointer;
 }
 

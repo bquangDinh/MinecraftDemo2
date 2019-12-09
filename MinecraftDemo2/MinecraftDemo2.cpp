@@ -4,6 +4,7 @@
 #include "TextureManager.h"
 #include "Game.h"
 #include "Terrain.h"
+#include <thread>
 
 using namespace std;
 
@@ -69,7 +70,7 @@ int main()
 		glfwPollEvents();
 		glfwSwapBuffers(window);
 	}
-	
+
 	glfwTerminate();
 	myGame.Destroy();
 	return 0;
