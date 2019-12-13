@@ -6,6 +6,7 @@
 #include "CubeRenderer.h"
 #include "Camera.h"
 #include "ChunkManager.h"
+#include <string>
 
 //#define WIREFRAME_DEBUG
 

@@ -17,8 +17,8 @@ public:
 	CubeRenderer();
 	~CubeRenderer();
 
-	void AddQuadToVBO(Quad);
-	void AddQuadToVBO(Quad, bool);
+	void AddQuadToVBO(Quad, int, int, bool);
+
 	void GenerateVBO();
 	void GenerateVAO();
 	void Render();
@@ -28,8 +28,11 @@ private:
 	GLuint VBO;
 	vector<float> verticles;
 	vector<unsigned int> indicates;
+
 	int count = -1;
 	int faceCount = 0;
 	const float* getCubeTexCoord(int side, int type);
+	void increaseFaceCount();
+	void printReport();
 };
 

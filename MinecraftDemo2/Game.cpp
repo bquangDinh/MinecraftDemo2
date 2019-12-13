@@ -21,13 +21,19 @@ void Game::Init()
 #endif // WIREFRAME_DEBUG
 
 	//load everything (texture, shader .v.v)
-	TexturePiece grass_side = { "grass_side",12,15 };
-	TexturePiece grass_top = { "grass_top",7,13 };
-	TexturePiece grass_bottom = { "grass_bottom",13,15 };
+
+	/*
+	TexturePiece grass_side = { GRASS_SIDE_TEXTURE,12,15 };
+	TexturePiece grass_top = { GRASS_TOP_TEXTURE,7,13 };
+	TexturePiece grass_bottom = { GRASS_BOTTOM_TEXTURE,13,15 };
 	TexturePiece rock = { "rock",14,15 };
 	TexturePiece pieces[] = { grass_side,grass_top,grass_bottom,rock };
 	TextureManager::LoadTextureCoordAtlas("C:\\Users\\buiqu\\Downloads\\assets\\textures\\imageedit_2_3831088975.png", 15, 15, "texture_atlas", pieces, 4);
 	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
+	*/
+	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
+	
+	TextureManager::LoadTextureArray("C:\\Users\\buiqu\\Downloads\\assets\\textures\\T5XQv5z.png", true, "texture_array");
 
 	chunkManager.Init();
 

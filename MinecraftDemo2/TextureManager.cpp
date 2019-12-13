@@ -5,6 +5,7 @@
 
 std::map<std::string, Texture2D> TextureManager::Textures;
 std::map<std::string, TextureCoord> TextureManager::TextureCoordPieceInAtlas;
+std::map<std::string, Texture2DArray> TextureManager::Texture2DArrays;
 
 Texture2D TextureManager::LoadTexture(const GLchar* file, GLboolean lapha, std::string name)
 {
@@ -51,9 +52,25 @@ TextureCoord TextureManager::GetTextureCoordInAtlas(std::string nameOfpiece)
 	return TextureCoordPieceInAtlas[nameOfpiece];
 }
 
+Texture2DArray TextureManager::LoadTextureArray(const GLchar* file, GLboolean alpha, std::string name)
+{
+	printf("Load texture array\n");
+	Texture2DArrays[name] = loadTextureArrayFromFile(file, false);
+	return Texture2DArrays[name];
+}
+
+Texture2DArray TextureManager::GetTextureArray(std::string name)
+{
+	return Texture2DArrays[name];
+}
+
 void TextureManager::ClearTextures()
 {
 	for (auto iter : Textures) {
+		glDeleteTextures(1, &iter.second.ID);
+	}
+
+	for (auto iter : Texture2DArrays) {
 		glDeleteTextures(1, &iter.second.ID);
 	}
 }
@@ -71,4 +88,25 @@ Texture2D TextureManager::loadTextureFromFile(const GLchar* file, GLboolean alph
 	stbi_image_free(data);
 
 	return texture;
+}
+
+Texture2DArray TextureManager::loadTextureArrayFromFile(const GLchar* file, GLboolean alpha)
+{
+	Texture2DArray texture_array;
+
+	int width, height, nrChannels;
+	printf("%s\n", file);
+	unsigned char* data = stbi_load(file, &width, &height, &nrChannels, 0);
+
+	if (!data) {
+		printf("Unable to load image\n");
+	}
+
+	printf("%d | %d | %d\n", width, height,nrChannels);
+
+	texture_array.Generate(width, height, data);
+
+	stbi_image_free(data);
+
+	return texture_array;
 }

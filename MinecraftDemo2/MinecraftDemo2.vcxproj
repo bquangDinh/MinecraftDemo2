@@ -157,11 +157,13 @@
     <ClCompile Include="..\..\..\..\OneDrive\Desktop\Projects\OpenGLSources\glad.c" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ChunkManager.cpp" />
+    <ClCompile Include="Color.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="CubeChunk.cpp" />
     <ClCompile Include="CubeRenderer.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Mathf.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MinecraftDemo2.cpp" />
     <ClCompile Include="Quad.cpp" />
@@ -170,12 +172,15 @@
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="Texture2DArray.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Voxel.cpp" />
+    <ClCompile Include="VoxelColorManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ChunkManager.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="CubeChunk.h" />
     <ClInclude Include="CubeRenderer.h" />
@@ -183,6 +188,7 @@
     <ClInclude Include="CubeUtils.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Mathf.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Quad.h" />
@@ -192,9 +198,11 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="Texture2DArray.h" />
     <ClInclude Include="TextureCoord.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Voxel.h" />
+    <ClInclude Include="VoxelColorManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="fragmentShader.frag" />

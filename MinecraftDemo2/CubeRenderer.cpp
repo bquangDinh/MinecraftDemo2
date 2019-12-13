@@ -8,103 +8,7 @@ CubeRenderer::~CubeRenderer()
 {
 }
 
-void CubeRenderer::AddQuadToVBO(Quad quad)
-{
-	if (quad.direction == FRONTSIDE || quad.direction == TOPSIDE || quad.direction == LEFTSIDE) {
-		this->indicates.push_back(3 + 4 * this->faceCount);
-		this->indicates.push_back(1 + 4 * this->faceCount);
-		this->indicates.push_back(0 + 4 * this->faceCount);
-
-		this->indicates.push_back(3 + 4 * this->faceCount);
-		this->indicates.push_back(2 + 4 * this->faceCount);
-		this->indicates.push_back(1 + 4 * this->faceCount);
-	}
-	else {
-		this->indicates.push_back(0 + 4 * this->faceCount);
-		this->indicates.push_back(1 + 4 * this->faceCount);
-		this->indicates.push_back(3 + 4 * this->faceCount);
-
-		this->indicates.push_back(1 + 4 * this->faceCount);
-		this->indicates.push_back(2 + 4 * this->faceCount);
-		this->indicates.push_back(3 + 4 * this->faceCount);
-	}
-
-	this->faceCount++;
-
-	const float* texCoordPointer = NULL;
-	int side = quad.direction;
-	int type = quad.type;
-
-	if (side == 0 || side == 1 || side == 2 || side == 3) {
-		if (type == 1) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
-		}
-		else if (type == 2) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
-		}
-	}
-	else if (side == 4) {
-		if (type == 1) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
-		}
-		else if (type == 2) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
-		}
-	}
-	else if (side == 5) {
-		if (type == 1) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
-		}
-		else if (type == 2) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
-		}
-	}
-
-	if (texCoordPointer == NULL) {
-		texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
-	}
-
-	this->verticles.push_back(quad.p1.x);
-	this->verticles.push_back(quad.p1.y);
-	this->verticles.push_back(quad.p1.z);
-	//cout << "x: " << quad.p1.x << " y: " << quad.p1.y << " z: " << quad.p1.z << endl;
-
-	this->verticles.push_back(*(texCoordPointer + 0));
-	this->verticles.push_back(*(texCoordPointer + 1));
-	//cout << "u: " << *(texCoordPointer + 0) << " v: " << *(texCoordPointer + 1) << endl;
-
-	this->verticles.push_back(quad.p2.x);
-	this->verticles.push_back(quad.p2.y);
-	this->verticles.push_back(quad.p2.z);
-	//cout << "x: " << quad.p2.x << " y: " << quad.p2.y << " z: " << quad.p2.z << endl;
-
-	this->verticles.push_back(*(texCoordPointer + 2));
-	this->verticles.push_back(*(texCoordPointer + 3));
-
-	this->verticles.push_back(quad.p3.x);
-	this->verticles.push_back(quad.p3.y);
-	this->verticles.push_back(quad.p3.z);
-	//cout << "x: " << quad.p3.x << " y: " << quad.p3.y << " z: " << quad.p3.z << endl;
-
-	this->verticles.push_back(*(texCoordPointer + 4));
-	this->verticles.push_back(*(texCoordPointer + 5));
-
-	this->verticles.push_back(quad.p4.x);
-	this->verticles.push_back(quad.p4.y);
-	this->verticles.push_back(quad.p4.z);
-	//cout << "x: " << quad.p4.x << " y: " << quad.p4.y << " z: " << quad.p4.z << endl;
-
-	this->verticles.push_back(*(texCoordPointer + 6));
-	this->verticles.push_back(*(texCoordPointer + 7));
-}
-
-void CubeRenderer::AddQuadToVBO(Quad quad, bool backFace)
+void CubeRenderer::AddQuadToVBO(Quad quad, int width, int height, bool backFace)
 {
 	if (!backFace) {
 		this->indicates.push_back(0 + 4 * this->faceCount);
@@ -126,53 +30,34 @@ void CubeRenderer::AddQuadToVBO(Quad quad, bool backFace)
 	}
 
 	this->faceCount++;
+	unsigned int texIndex = 0;
 
-	const float* texCoordPointer = NULL;
-	int side = quad.direction;
-	int type = quad.type;
-
-	if (side == 0 || side == 1 || side == 2 || side == 3) {
-		if (type == 1) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
+	if (quad.getType() == GRASS_BLOCK) {
+		if (quad.getFace() == TOPSIDE) {
+			texIndex = 0;
 		}
-		else if (type == 2) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		else if (quad.getFace() == BOTTOMSIDE) {
+			texIndex = 2;
 		}
-	}
-	else if (side == 4) {
-		if (type == 1) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_top").texCoord;
-		}
-		else if (type == 2) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
-		}
-	}
-	else if (side == 5) {
-		if (type == 1) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_bottom").texCoord;
-		}
-		else if (type == 2) {
-			//grass block
-			texCoordPointer = TextureManager::GetTextureCoordInAtlas("rock").texCoord;
+		else {
+			texIndex = 3;
 		}
 	}
 
-	if (texCoordPointer == NULL) {
-		texCoordPointer = TextureManager::GetTextureCoordInAtlas("grass_side").texCoord;
-	}
+	//cout << "Tex index: " << texIndex << endl;
+	//cout << "Face: " << quad.getFace() << endl;
 
 	this->verticles.push_back(quad.p1.x);
 	this->verticles.push_back(quad.p1.y);
 	this->verticles.push_back(quad.p1.z);
 	//cout << "x: " << quad.p1.x << " y: " << quad.p1.y << " z: " << quad.p1.z << endl;
 
-	this->verticles.push_back(*(texCoordPointer + 0));
-	this->verticles.push_back(*(texCoordPointer + 1));
+	this->verticles.push_back(1.0f + width);
+	this->verticles.push_back(1.0f + height);
+
+	this->verticles.push_back(texIndex);
+	this->verticles.push_back(texIndex);
+
 	//cout << "u: " << *(texCoordPointer + 0) << " v: " << *(texCoordPointer + 1) << endl;
 
 	this->verticles.push_back(quad.p2.x);
@@ -180,24 +65,33 @@ void CubeRenderer::AddQuadToVBO(Quad quad, bool backFace)
 	this->verticles.push_back(quad.p2.z);
 	//cout << "x: " << quad.p2.x << " y: " << quad.p2.y << " z: " << quad.p2.z << endl;
 
-	this->verticles.push_back(*(texCoordPointer + 2));
-	this->verticles.push_back(*(texCoordPointer + 3));
+	this->verticles.push_back(1.0f + width);
+	this->verticles.push_back(0.0f);
+
+	this->verticles.push_back(texIndex);
+	this->verticles.push_back(texIndex);
 
 	this->verticles.push_back(quad.p3.x);
 	this->verticles.push_back(quad.p3.y);
 	this->verticles.push_back(quad.p3.z);
 	//cout << "x: " << quad.p3.x << " y: " << quad.p3.y << " z: " << quad.p3.z << endl;
 
-	this->verticles.push_back(*(texCoordPointer + 4));
-	this->verticles.push_back(*(texCoordPointer + 5));
+	this->verticles.push_back(0.0f);
+	this->verticles.push_back(0.0f);
+
+	this->verticles.push_back(texIndex);
+	this->verticles.push_back(texIndex);
 
 	this->verticles.push_back(quad.p4.x);
 	this->verticles.push_back(quad.p4.y);
 	this->verticles.push_back(quad.p4.z);
 	//cout << "x: " << quad.p4.x << " y: " << quad.p4.y << " z: " << quad.p4.z << endl;
+	//cout << endl;
+	this->verticles.push_back(0.0f);
+	this->verticles.push_back(1.0f + height);
 
-	this->verticles.push_back(*(texCoordPointer + 6));
-	this->verticles.push_back(*(texCoordPointer + 7));
+	this->verticles.push_back(texIndex);
+	this->verticles.push_back(texIndex);
 }
 
 void CubeRenderer::GenerateVBO()
@@ -221,11 +115,14 @@ void CubeRenderer::GenerateVBO()
 
 	//for position
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
 
 	//for uv
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
 
 	this->VBO = VBO;
 	this->EBO = EBO;
@@ -241,7 +138,7 @@ void CubeRenderer::GenerateVAO()
 
 void CubeRenderer::Render()
 {
-	TextureManager::GetTexture("texture_atlas").Bind();
+	TextureManager::GetTextureArray("texture_array").Bind();
 	ShaderManager::GetShaderProgram("shader_program").Use();
 	glBindVertexArray(this->VAO);
 	glDrawElements(GL_TRIANGLES, this->indicates.size(), GL_UNSIGNED_INT, (void*)0);
@@ -287,5 +184,16 @@ const float* CubeRenderer::getCubeTexCoord(int side, int type)
 	}
 
 	return texCoordPointer;
+}
+
+void CubeRenderer::increaseFaceCount()
+{
+	this->faceCount++;
+}
+
+void CubeRenderer::printReport()
+{
+	cout << "Face count: " << "\t" << this->faceCount << endl;
+	cout << "Verticles: " << "\t" << 4 * this->faceCount << endl;
 }
 
