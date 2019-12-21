@@ -1,7 +1,16 @@
 #include "Game.h"
 
-Game::Game(GLuint, GLuint)
+Game::Game(GLuint width, GLuint height)
 {
+	Width = width;
+	Height = Height;
+	currentState = GameState::RUNNING;
+	chunkManager = new ChunkManager(glm::vec3(10, 1, 10), glm::vec3(16, 16, 16));
+	if (chunkManager == nullptr) {
+#ifdef DEBUG
+		cout << "Cannot create a new Chunk Manager. Something goes wrong !!!" << endl;
+#endif // DEBUG
+	}
 }
 
 Game::~Game()
@@ -13,12 +22,19 @@ void Game::Init()
 	double firstTime = glfwGetTime();
 	cout << "Initialize..." << endl;
 
+#ifdef ENABLE_DEPTH_TEST
 	glEnable(GL_DEPTH_TEST);
+#endif
+
+#ifdef ENABLE_CULLING_MODE
+	glEnable(GL_CULL_FACE);
+#endif
+
 	glEnable(GL_CULL_FACE);
 
 #ifdef WIREFRAME_DEBUG
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-#endif // WIREFRAME_DEBUG
+#endif
 
 	//load everything (texture, shader .v.v)
 
@@ -35,7 +51,7 @@ void Game::Init()
 	
 	TextureManager::LoadTextureArray("C:\\Users\\buiqu\\Downloads\\assets\\textures\\T5XQv5z.png", true, "texture_array");
 
-	chunkManager.Init();
+	chunkManager->Initialize();
 
 	double lastTime = glfwGetTime();
 	cout << "Done !" << endl;
@@ -86,7 +102,7 @@ void Game::Render()
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("projection", projection);
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("view", mainCamera.getViewMatrix());
 
-	chunkManager.Update();
+	chunkManager->Update();
 }
 
 void Game::ViewRender()

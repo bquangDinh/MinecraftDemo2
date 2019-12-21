@@ -75,10 +75,13 @@
     <ClCompile Include="Mathf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="VoxelColorManager.cpp">
+    <ClCompile Include="Texture2DArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Texture2DArray.cpp">
+    <ClCompile Include="MeshBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -152,10 +155,16 @@
     <ClInclude Include="Mathf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VoxelColorManager.h">
+    <ClInclude Include="Texture2DArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Texture2DArray.h">
+    <ClInclude Include="GLM.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

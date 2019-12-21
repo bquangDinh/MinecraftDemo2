@@ -33,10 +33,10 @@ void CubeRenderer::AddQuadToVBO(Quad quad, int width, int height, bool backFace)
 	unsigned int texIndex = 0;
 
 	if (quad.getType() == GRASS_BLOCK) {
-		if (quad.getFace() == TOPSIDE) {
+		if (quad.getFace() == SIDE::TOP) {
 			texIndex = 0;
 		}
-		else if (quad.getFace() == BOTTOMSIDE) {
+		else if (quad.getFace() == SIDE::BOTTOM) {
 			texIndex = 2;
 		}
 		else {

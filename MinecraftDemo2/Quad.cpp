@@ -18,7 +18,7 @@ Quad::Quad()
 	this->p3 = glm::vec3();
 	this->p4 = glm::vec3();
 	this->type = AIR_BLOCK;
-	this->face = FRONTSIDE;
+	this->face = SIDE::FRONT;
 	this->transparent = true;
 }
 
@@ -41,6 +41,29 @@ int Quad::getFace()
 bool Quad::isTransparent()
 {
 	return this->transparent;
+}
+
+void Quad::RotateQuadOrder90()
+{
+	glm::vec3 t1, t2, t3;
+	t1 = p1;
+	t2 = p2;
+	t3 = p3;
+
+	p1 = p4;
+	p2 = t1;
+	p3 = t2;
+	p4 = t3;
+}
+
+void Quad::RotateQuadOrder90Counter()
+{
+	glm::vec3 t1;
+	t1 = p1;
+	p1 = p2;
+	p2 = p3;
+	p3 = p4;
+	p4 = t1;
 }
 
 void Quad::RolateQuadOrder90(glm::vec4& p1, glm::vec4& p2, glm::vec4& p3, glm::vec4& p4)

@@ -9,6 +9,8 @@
 #include <string>
 
 //#define WIREFRAME_DEBUG
+#define ENABLE_CULLING_MODE
+#define ENABLE_DEPTH_TEST
 
 enum GameState {
 	RUNNING,
@@ -22,9 +24,8 @@ public:
 	GLboolean Keys[1024];
 	GLuint Width, Height;
 	Camera mainCamera;
-	ChunkManager chunkManager;
-	CubeChunk c1, c2;
-	Game(GLuint, GLuint);
+	ChunkManager* chunkManager;
+	Game(GLuint width, GLuint height);
 	~Game();
 
 	//Load Textures and Shaders

@@ -1,74 +1,62 @@
 #pragma once
-#include "CubeRenderer.h"
+#include "MeshBuilder.h"
 #include "CubeUtils.h"
+#include "GLM.h"
 #include "TextureManager.h"
 #include "Voxel.h"
 #include "Quad.h"
 #include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <bitmap/bitmap_image.hpp>
+#include "MeshGenerator.h"
+
+enum MESHING_METHOD {
+	STUPID,
+	CULLING,
+	GREEDY
+};
 
 class CubeChunk
 {
 private:
-	const float VOXEL_UNIT = 1.0f;
-
-	Voxel Cubes[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE] = { Voxel(false,AIR_BLOCK) };
-	const glm::vec3 Dimensions = glm::vec3(CHUNK_SIZE, CHUNK_SIZE, CHUNK_SIZE);
-
-	CubeRenderer cubeRenderer;
-
-	bool hasChanged = false;
-
-	glm::vec3 chunkPos;
+	const float VOXEL_UNIT;
+	std::vector<Voxel> voxels;
+	glm::vec3 Dimensions, ChunkPosition;
 	glm::mat4 model;
+	MeshBuilder meshBuider;
+	CubeChunk* neighbors[6] = { nullptr };
 
-	CubeChunk* neighbors[6] = { NULL };
+	void setDimensions(int x,int y,int z);
+	void setDimensions(glm::vec3 dimensions);
 
-	//Voxel functions
-	Voxel getVoxel(int, int, int);
-	Voxel getVoxel(glm::vec3);
-	void setVoxel(int, int, int, int, bool);
+	int FlattenIndex(glm::vec3 pos);
+	
+	bool isContainsPosition(glm::vec3 pos);
+	bool isBlockFaceVisible(glm::vec3 pos, int direction, bool backface);
+	bool compareStep(glm::vec3 pos1, glm::vec3 pos2, int direction, bool backface);
+	int getActualFace(int direction, bool backface);
 
-	//meshing algorimn
+	//meshing algorthrimn
 	void stupid();
-
 	void culling();
-
-	bool isVisibleQuad(int x, int y, int z,int side);
-
-	bool compareStep(glm::vec3, glm::vec3, int, bool);
-	bool IsBlockFaceVisible(glm::vec3, int, bool);
-	Voxel setBlock(glm::vec3, int, bool);
-	bool ContainsIndex(glm::vec3);
-	int FlattenIndex(glm::vec3);
 	void greedy();
-	void getQuad(int, int, int, int,Quad&);
 
-public:
-	bool hasCreated = false;
-	bool isReady = false;
-	bool hasGenerated = false;
+	Voxel getVoxelNeighbor(glm::vec3 pos, int direction, bool backface);
+public: 
+	bool hasChanged;
+	bool hasGeneratedTerrain;
 
+	CubeChunk(glm::vec3 pos, glm::vec3 dimensions);
 	CubeChunk();
 	~CubeChunk();
 
-	CubeChunk operator=(CubeChunk&);
+	Voxel getVoxel(int x, int y, int z);
+	Voxel getVoxel(glm::vec3 pos);
 
-	void Init(glm::vec3 position, int*, int, int);
-	void Init(glm::vec3 position);
+	void AddNeighbor(CubeChunk* chunk, SIDE side);
+	CubeChunk* getNeighbor(SIDE side);
+	bool hasNeighbor(SIDE side);
 
-	void CreateMesh(int*, int, int);
-	void CreateMesh();
-
-	void Generate();
-	void DoMeshing();
-
-	void AddNeighBor(CubeChunk*,int);
-	CubeChunk* getNeighBor(int);
-
+	void DoMeshing(MESHING_METHOD meshing_method);
+	void GenerateTerrain();
 	void Update();
 };
 
