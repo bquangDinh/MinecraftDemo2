@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\buiqu\Downloads\bitmap;C:\Users\buiqu\OneDrive\Desktop\Projects\OpenGLSources\Includes\includeGLAD;C:\Users\buiqu\OneDrive\Desktop\Projects\OpenGLSources\glm;C:\Users\buiqu\OneDrive\Desktop\Projects\OpenGLSources\Includes\includeGLFW;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\buiqu\OneDrive\Desktop\Projects\PerlinNoise-master;C:\Users\buiqu\Downloads\bitmap;C:\Users\buiqu\OneDrive\Desktop\Projects\OpenGLSources\Includes\includeGLAD;C:\Users\buiqu\OneDrive\Desktop\Projects\OpenGLSources\glm;C:\Users\buiqu\OneDrive\Desktop\Projects\OpenGLSources\Includes\includeGLFW;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\buiqu\OneDrive\Desktop\Projects\OpenGLSources\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -157,12 +157,16 @@
     <ClCompile Include="..\..\..\..\OneDrive\Desktop\Projects\OpenGLSources\glad.c" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ChunkManager.cpp" />
+    <ClCompile Include="Color.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="CubeChunk.cpp" />
     <ClCompile Include="CubeRenderer.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Mathf.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="MeshBuilder.cpp" />
+    <ClCompile Include="MeshGenerator.cpp" />
     <ClCompile Include="MinecraftDemo2.cpp" />
     <ClCompile Include="Quad.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -170,12 +174,14 @@
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="Texture2DArray.cpp" />
     <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="Voxel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ChunkManager.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="CubeChunk.h" />
     <ClInclude Include="CubeRenderer.h" />
@@ -183,8 +189,12 @@
     <ClInclude Include="CubeUtils.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="GLM.h" />
+    <ClInclude Include="Mathf.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="MeshBuilder.h" />
+    <ClInclude Include="MeshGenerator.h" />
     <ClInclude Include="Quad.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -192,6 +202,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="Texture2DArray.h" />
     <ClInclude Include="TextureCoord.h" />
     <ClInclude Include="TextureManager.h" />
     <ClInclude Include="Voxel.h" />

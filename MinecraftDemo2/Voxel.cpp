@@ -3,7 +3,7 @@
 Voxel::Voxel()
 {
 	this->transparent = true;
-	this->type = AIR_BLOCK;
+	this->type = VOXEL_TYPE::AIR;
 }
 
 Voxel::Voxel(bool transparent, int type)
@@ -20,5 +20,5 @@ bool Voxel::equals(Voxel another)
 
 bool Voxel::isSolid()
 {
-	return this->type != AIR_BLOCK;
+	return this->type != VOXEL_TYPE::AIR;
 }

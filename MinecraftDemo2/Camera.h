@@ -13,7 +13,7 @@ private:
 	float cameraSpeed = 20.5f;
 
 	//align turning around speed ==> not too fast && not too slow
-	float sensitivity = 0.05f;
+	float sensitivity = 0.5f;
 
 	float pitch = 0.0f; // look up and down
 	const float PITCH_LIMIT = 89.0f;

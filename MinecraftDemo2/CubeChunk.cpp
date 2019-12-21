@@ -1,141 +1,182 @@
 #include "CubeChunk.h"
 
-Voxel CubeChunk::getVoxel(int x, int y, int z)
+void CubeChunk::setDimensions(int x, int y, int z)
 {
-	glm::vec3 position = glm::vec3(x, y, z);
-	return getVoxel(position);
+	if (x <= 0) x = VOXEL_UNIT;
+	if (y <= 0) y = VOXEL_UNIT;
+	if (z <= 0) z = VOXEL_UNIT;
+	Dimensions = glm::vec3(x, y, z);
 }
 
-Voxel CubeChunk::getVoxel(glm::vec3 position)
+void CubeChunk::setDimensions(glm::vec3 dimensions)
 {
-	if (!ContainsIndex(position)) {
-		Voxel v(false, AIR_BLOCK);
-		return v;
+	if (dimensions.x <= 0) dimensions.x = VOXEL_UNIT;
+	if (dimensions.y <= 0) dimensions.y = VOXEL_UNIT;
+	if (dimensions.z <= 0) dimensions.z = VOXEL_UNIT;
+	Dimensions = dimensions;
+}
+
+int CubeChunk::FlattenIndex(glm::vec3 pos)
+{
+	return (pos.z * Dimensions.z * Dimensions.z) + (pos.y * Dimensions.y) + pos.x;
+}
+
+bool CubeChunk::isContainsPosition(glm::vec3 pos)
+{
+	return pos.x >= 0 && pos.x < Dimensions.x && pos.y >= 0 && pos.y < Dimensions.y && pos.z >= 0 && pos.z < Dimensions.z;
+}
+
+bool CubeChunk::isBlockFaceVisible(glm::vec3 pos, int direction, bool backface)
+{
+	//NOTE [WARNING A BUG]
+	pos[direction] += backface ? -1 : 1;
+	if (!isContainsPosition(pos)) {
+		return !getVoxelNeighbor(pos, direction, backface).isSolid();
+	}
+	return !getVoxel(pos).isSolid();
+}
+
+bool CubeChunk::compareStep(glm::vec3 pos1, glm::vec3 pos2, int direction, bool backface)
+{
+	Voxel v1 = getVoxel(pos1);
+	Voxel v2 = getVoxel(pos2);
+
+	return v1.equals(v2) && v2.isSolid() && isBlockFaceVisible(pos2, direction, backface);
+}
+
+int CubeChunk::getActualFace(int direction, bool backface)
+{
+	if (direction == 0) {
+		//YZ plane
+		return backface ? SIDE::LEFT : SIDE::RIGHT;
 	}
 
-	return this->Cubes[FlattenIndex(position)];
-}
+	if (direction == 1) {
+		//XZ plane
+		return backface ? SIDE::BOTTOM : SIDE::TOP;
+	}
 
-void CubeChunk::setVoxel(int x, int y, int z, int type, bool transparent)
-{
-	Voxel voxel(transparent, type);
-	this->Cubes[z + CHUNK_SIZE * (y + CHUNK_SIZE * x)] = voxel;
+	if (direction == 2) {
+		//XY plane
+		return backface ? SIDE::BACK : SIDE::FRONT;
+	}
+
+	//just make sure I return something if it goes wrong !
+	return SIDE::FRONT;
 }
 
 void CubeChunk::stupid()
 {
-	//this function follow the instruction https://eddieabbondanz.io/post/voxel/greedy-mesh/
-	int direction, workAxis1, workAxis2;
-	bool merged[CHUNK_SIZE][CHUNK_SIZE] = { false };
-	glm::vec3 startPos, currPos, quadSize, m, n, offsetPos;
+	int direction, workAxis1, workAxis2, face;
+	glm::vec3 startPos, quadSize, m, n, offsetPos;
+	glm::vec4 p1, p2, p3, p4;
+	bool backface;
+	Voxel startVoxel;
 
-	Point q_p1, q_p2, q_p3, q_p4;
-	glm::vec4 p1 = glm::vec4();
-	glm::vec4 p2 = glm::vec4();
-	glm::vec4 p3 = glm::vec4();
-	glm::vec4 p4 = glm::vec4();
-
-	for (int face = 0; face < NUM_OF_SIDES; face++) {
-		bool isBackFace = face % 2 == 0 ? false : true;
-
+	for (face = 0; face < NUM_OF_SIDES; face++) {
+		backface = face % 2 == 0 ? false : true;
 		direction = face % 3;
 		workAxis1 = (direction + 1) % 3;
 		workAxis2 = (direction + 2) % 3;
 
 		startPos = glm::vec3();
-		currPos = glm::vec3();
 
-		for (startPos[direction] = 0; startPos[direction] < CHUNK_SIZE; startPos[direction]++) {
-			//reset merged array if we've done before
-			memset(merged, false, sizeof(merged));
+		for (startPos[direction] = 0; startPos[direction] < Dimensions[direction]; ++startPos[direction]) {
+			for (startPos[workAxis1] = 0; startPos[workAxis1] < Dimensions[workAxis1]; ++startPos[workAxis1]) {
+				for (startPos[workAxis2] = 0; startPos[workAxis2] < Dimensions[workAxis2]; ++startPos[workAxis2]) {
+					startVoxel = getVoxel(startPos);
 
-			for (startPos[workAxis1] = 0; startPos[workAxis1] < CHUNK_SIZE; startPos[workAxis1]++) {
-				for (startPos[workAxis2] = 0; startPos[workAxis2] < CHUNK_SIZE; startPos[workAxis2]++) {
-					Voxel startVoxel = this->getVoxel(startPos);
+					if (!startVoxel.isSolid()) continue;
 
 					quadSize = glm::vec3();
 
 					//width
-					quadSize[workAxis2] = this->VOXEL_UNIT;
+					quadSize[workAxis2] = VOXEL_UNIT;
 
 					//height
-					quadSize[workAxis1] = this->VOXEL_UNIT;
+					quadSize[workAxis1] = VOXEL_UNIT;
 
 					m = glm::vec3();
 					n = glm::vec3();
+
 					m[workAxis1] = quadSize[workAxis1];
 					n[workAxis2] = quadSize[workAxis2];
 
 					offsetPos = startPos;
-					offsetPos[direction] += isBackFace ? 0 : 1;
+
+					if (VOXEL_UNIT < 1.0f) {
+						offsetPos.x += offsetPos.x >= 1 ? -VOXEL_UNIT : 0;
+						offsetPos.y += offsetPos.y >= 1 ? -VOXEL_UNIT : 0;
+						offsetPos.z += offsetPos.z >= 1 ? -VOXEL_UNIT : 0;
+					}
+
+					offsetPos[direction] += backface ? 0 : VOXEL_UNIT;
 
 					p1 = model * glm::vec4(offsetPos, 1.0f);
 					p2 = model * glm::vec4(offsetPos + m, 1.0f);
 					p3 = model * glm::vec4(offsetPos + m + n, 1.0f);
 					p4 = model * glm::vec4(offsetPos + n, 1.0f);
 
-					q_p1 = { p1.x, p1.y, p1.z };
-					q_p2 = { p2.x, p2.y, p2.z };
-					q_p3 = { p3.x, p3.y, p3.z };
-					q_p4 = { p4.x, p4.y, p4.z };
+					int actualFace = getActualFace(direction, backface);
 
-					Voxel voxel = getVoxel(startPos);
-					Quad quad(q_p1, q_p2, q_p3, q_p4, voxel.type, face, voxel.transparent);
-					this->cubeRenderer.AddQuadToVBO(quad, isBackFace);
+					Quad quad(
+						glm::vec3(p1.x, p1.y, p1.z),
+						glm::vec3(p2.x, p2.y, p2.z),
+						glm::vec3(p3.x, p3.y, p3.z),
+						glm::vec3(p4.x, p4.y, p4.z),
+						startVoxel.type,
+						actualFace,
+						startVoxel.transparent
+					);	
 
-					for (int f = 0; f < quadSize[workAxis1]; f++) {
-						for (int g = 0; g < quadSize[workAxis2]; g++) {
-							merged[(int)startPos[workAxis1] + f][(int)startPos[workAxis2] + g] = true;
-						}
+					if (direction == 2) {
+						quad.RotateQuadOrder90Counter();
+						meshBuider.AddQuad(quad, quadSize[workAxis1], quadSize[workAxis2], backface);
+					}
+					else {
+						meshBuider.AddQuad(quad, quadSize[workAxis2], quadSize[workAxis1], backface);
 					}
 				}
 			}
 		}
 	}
+
+	meshBuider.GenerateVBO();
 }
 
 void CubeChunk::culling()
 {
-	//this function follow the instruction https://eddieabbondanz.io/post/voxel/greedy-mesh/
-	int direction, workAxis1, workAxis2;
-	bool merged[CHUNK_SIZE][CHUNK_SIZE] = { false };
-	glm::vec3 startPos, currPos, quadSize, m, n, offsetPos;
-
-	Point q_p1, q_p2, q_p3, q_p4;
-	glm::vec4 p1 = glm::vec4();
-	glm::vec4 p2 = glm::vec4();
-	glm::vec4 p3 = glm::vec4();
-	glm::vec4 p4 = glm::vec4();
+	int direction, workAxis1, workAxis2, face;
+	glm::vec3 startPos, quadSize, m, n, offsetPos;
+	glm::vec4 p1, p2, p3, p4;
+	bool backface;
+	Voxel startVoxel;
 
 	for (int face = 0; face < NUM_OF_SIDES; face++) {
-		bool isBackFace = face % 2 == 0 ? false : true;
+		backface = face % 2 == 0 ? false : true;
 
 		direction = face % 3;
 		workAxis1 = (direction + 1) % 3;
 		workAxis2 = (direction + 2) % 3;
 
 		startPos = glm::vec3();
-		currPos = glm::vec3();
 
-		for (startPos[direction] = 0; startPos[direction] < CHUNK_SIZE; startPos[direction]++) {
-			//reset merged array if we've done before
-			memset(merged, false, sizeof(merged));
-
-			for (startPos[workAxis1] = 0; startPos[workAxis1] < CHUNK_SIZE; startPos[workAxis1]++) {
-				for (startPos[workAxis2] = 0; startPos[workAxis2] < CHUNK_SIZE; startPos[workAxis2]++) {
+		for (startPos[direction] = 0; startPos[direction] < Dimensions.x; startPos[direction]++) {
+			for (startPos[workAxis1] = 0; startPos[workAxis1] < Dimensions.y; startPos[workAxis1]++) {
+				for (startPos[workAxis2] = 0; startPos[workAxis2] < Dimensions.z; startPos[workAxis2]++) {
 					Voxel startVoxel = this->getVoxel(startPos);
 
-					if (merged[(int)startPos[workAxis1]][(int)startPos[workAxis2]] == true || !startVoxel.isSolid() || !IsBlockFaceVisible(startPos, direction, isBackFace)) {
+					if (!startVoxel.isSolid() || !isBlockFaceVisible(startPos, direction, backface)) {
 						continue;
 					}
 
 					quadSize = glm::vec3();
 
 					//width
-					quadSize[workAxis2] = this->VOXEL_UNIT;
+					quadSize[workAxis2] = VOXEL_UNIT;
 
 					//height
-					quadSize[workAxis1] = this->VOXEL_UNIT;
+					quadSize[workAxis1] = VOXEL_UNIT;
 
 					m = glm::vec3();
 					n = glm::vec3();
@@ -143,82 +184,57 @@ void CubeChunk::culling()
 					n[workAxis2] = quadSize[workAxis2];
 
 					offsetPos = startPos;
-					offsetPos[direction] += isBackFace ? 0 : 1;
+
+					if (VOXEL_UNIT < 1.0f) {
+						offsetPos.x += offsetPos.x >= 1 ? -VOXEL_UNIT : 0;
+						offsetPos.y += offsetPos.y >= 1 ? -VOXEL_UNIT : 0;
+						offsetPos.z += offsetPos.z >= 1 ? -VOXEL_UNIT : 0;
+					}
+
+					offsetPos[direction] += backface ? 0 : VOXEL_UNIT;
 
 					p1 = model * glm::vec4(offsetPos, 1.0f);
 					p2 = model * glm::vec4(offsetPos + m, 1.0f);
 					p3 = model * glm::vec4(offsetPos + m + n, 1.0f);
 					p4 = model * glm::vec4(offsetPos + n, 1.0f);
 
-					q_p1 = { p1.x, p1.y, p1.z };
-					q_p2 = { p2.x, p2.y, p2.z };
-					q_p3 = { p3.x, p3.y, p3.z };
-					q_p4 = { p4.x, p4.y, p4.z };
+					int actualFace = getActualFace(direction, backface);
 
-					Voxel voxel = getVoxel(startPos);
-					Quad quad(q_p1, q_p2, q_p3, q_p4, voxel.type, face, voxel.transparent);
-					this->cubeRenderer.AddQuadToVBO(quad, isBackFace);
+					Quad quad(
+						glm::vec3(p1.x, p1.y, p1.z),
+						glm::vec3(p2.x, p2.y, p2.z),
+						glm::vec3(p3.x, p3.y, p3.z),
+						glm::vec3(p4.x, p4.y, p4.z),
+						startVoxel.type,
+						actualFace,
+						startVoxel.transparent
+					);
 
-					for (int f = 0; f < quadSize[workAxis1]; f++) {
-						for (int g = 0; g < quadSize[workAxis2]; g++) {
-							merged[(int)startPos[workAxis1] + f][(int)startPos[workAxis2] + g] = true;
-						}
+					if (direction == 2) {
+						quad.RotateQuadOrder90Counter();
+						meshBuider.AddQuad(quad, quadSize[workAxis1], quadSize[workAxis2], backface);
+					}
+					else {
+						meshBuider.AddQuad(quad, quadSize[workAxis2], quadSize[workAxis1], backface);
 					}
 				}
 			}
 		}
 	}
-}
 
-bool CubeChunk::compareStep(glm::vec3 a, glm::vec3 b, int direction, bool backFace)
-{
-	Voxel A = getVoxel(a);
-	Voxel B = getVoxel(b);
-
-	return A.equals(B) && B.isSolid() && IsBlockFaceVisible(b, direction, backFace);
-}
-
-bool CubeChunk::IsBlockFaceVisible(glm::vec3 position, int axis, bool backFace)
-{
-	position[axis] += backFace ? -1 : 1;
-	return !getVoxel(position).isSolid();
-}
-
-Voxel CubeChunk::setBlock(glm::vec3 index, int type, bool transparent)
-{
-	if (!ContainsIndex(index)) {
-		cout << "Chunk is not contain this index: " << index.x << " " << index.y << " " << index.z << endl;
-		throw std::invalid_argument("Invalid index");
-	}
-	Voxel v(transparent, type);
-	this->Cubes[FlattenIndex(index)] = v;
-}
-
-bool CubeChunk::ContainsIndex(glm::vec3 index)
-{
-	return index.x >= 0 && index.x < CHUNK_SIZE && index.y >= 0 && index.y < CHUNK_SIZE && index.z >= 0 && index.z < CHUNK_SIZE;
-}
-
-int CubeChunk::FlattenIndex(glm::vec3 index)
-{
-	return (index.z * CHUNK_SIZE * CHUNK_SIZE) + (index.y * CHUNK_SIZE) + index.x;
+	meshBuider.GenerateVBO();
 }
 
 void CubeChunk::greedy()
 {
-	//this function follow the instruction https://eddieabbondanz.io/post/voxel/greedy-mesh/
-	int direction, workAxis1, workAxis2;
-	bool merged[CHUNK_SIZE][CHUNK_SIZE] = { false };
+	int direction, workAxis1, workAxis2, face;
 	glm::vec3 startPos, currPos, quadSize, m, n, offsetPos;
+	glm::vec4 p1, p2, p3, p4;
+	bool backface;
+	Voxel startVoxel;
 
-	Point q_p1, q_p2, q_p3, q_p4;
-	glm::vec4 p1 = glm::vec4();
-	glm::vec4 p2 = glm::vec4();
-	glm::vec4 p3 = glm::vec4();
-	glm::vec4 p4 = glm::vec4();
-
-    for (int face = 0; face < NUM_OF_SIDES; face++) {
-		bool isBackFace = face % 2 == 0 ? false : true;
+	for (int face = 0; face < NUM_OF_SIDES; face++) {
+		backface = face % 2 == 0 ? false : true;
 
 		direction = face % 3;
 		workAxis1 = (direction + 1) % 3;
@@ -227,27 +243,31 @@ void CubeChunk::greedy()
 		startPos = glm::vec3();
 		currPos = glm::vec3();
 
-		for (startPos[direction] = 0; startPos[direction] < CHUNK_SIZE; startPos[direction]++) {
-			//reset merged array if we've done before
-			memset(merged, false, sizeof(merged));
+		for (startPos[direction] = 0; startPos[direction] < Dimensions.x; startPos[direction]++) {
+			
+			bool** merged = new bool* [Dimensions[workAxis1]];
+			for (int i = 0; i < Dimensions[workAxis1]; ++i) {
+				merged[i] = new bool[Dimensions[workAxis2]];
+				memset(merged[i], false, Dimensions[workAxis1] * sizeof(bool));
+			}
 
-			for (startPos[workAxis1] = 0; startPos[workAxis1] < CHUNK_SIZE; startPos[workAxis1]++) {
- 				for (startPos[workAxis2] = 0; startPos[workAxis2] < CHUNK_SIZE; startPos[workAxis2]++) {
+			for (startPos[workAxis1] = 0; startPos[workAxis1] < Dimensions.y; startPos[workAxis1]++) {
+				for (startPos[workAxis2] = 0; startPos[workAxis2] < Dimensions.z; startPos[workAxis2]++) {
 					Voxel startVoxel = this->getVoxel(startPos);
 
-					if (merged[(int)startPos[workAxis1]][(int)startPos[workAxis2]] == true || !startVoxel.isSolid() || !IsBlockFaceVisible(startPos,direction,isBackFace)) {
+					if (merged[(int)startPos[workAxis1]][(int)startPos[workAxis2]] == true || !startVoxel.isSolid() || !isBlockFaceVisible(startPos, direction, backface)) {
 						continue;
 					}
 
 					quadSize = glm::vec3();
 
 					//width
-					for(currPos = startPos,currPos[workAxis2]++;currPos[workAxis2] < CHUNK_SIZE && compareStep(startPos,currPos,direction,isBackFace) && !merged[(int)currPos[workAxis1]][(int)currPos[workAxis2]];currPos[workAxis2]++){}
+					for (currPos = startPos, currPos[workAxis2]++; currPos[workAxis2] < Dimensions[workAxis2] && compareStep(startPos, currPos, direction, backface) && !merged[(int)currPos[workAxis1]][(int)currPos[workAxis2]]; currPos[workAxis2]++) {}
 					quadSize[workAxis2] = currPos[workAxis2] - startPos[workAxis2];
 
 					//height
-					for (currPos = startPos, currPos[workAxis1]++; currPos[workAxis1] < CHUNK_SIZE && compareStep(startPos, currPos, direction, isBackFace) && !merged[(int)currPos[workAxis1]][(int)currPos[workAxis2]]; currPos[workAxis1]++) {
-						for(currPos[workAxis2] = startPos[workAxis2];currPos[workAxis2] < CHUNK_SIZE && compareStep(startPos, currPos, direction, isBackFace) && !merged[(int)currPos[workAxis1]][(int)currPos[workAxis2]];currPos[workAxis2]++){}
+					for (currPos = startPos, currPos[workAxis1]++; currPos[workAxis1] < Dimensions[workAxis1] && compareStep(startPos, currPos, direction, backface) && !merged[(int)currPos[workAxis1]][(int)currPos[workAxis2]]; currPos[workAxis1]++) {
+						for (currPos[workAxis2] = startPos[workAxis2]; currPos[workAxis2] < Dimensions[workAxis2] && compareStep(startPos, currPos, direction, backface) && !merged[(int)currPos[workAxis1]][(int)currPos[workAxis2]]; currPos[workAxis2]++) {}
 
 						if (currPos[workAxis2] - startPos[workAxis2] < quadSize[workAxis2]) {
 							break;
@@ -258,28 +278,46 @@ void CubeChunk::greedy()
 					}
 					quadSize[workAxis1] = currPos[workAxis1] - startPos[workAxis1];
 
+
 					m = glm::vec3();
 					n = glm::vec3();
 					m[workAxis1] = quadSize[workAxis1];
 					n[workAxis2] = quadSize[workAxis2];
-					//cout << "w: " << quadSize[workAxis2] << " |h: " << quadSize[workAxis1] << endl;
 
 					offsetPos = startPos;
-					offsetPos[direction] += isBackFace ? 0 : 1;
+
+					if (VOXEL_UNIT < 1.0f) {
+						offsetPos.x += offsetPos.x >= 1 ? -VOXEL_UNIT : 0;
+						offsetPos.y += offsetPos.y >= 1 ? -VOXEL_UNIT : 0;
+						offsetPos.z += offsetPos.z >= 1 ? -VOXEL_UNIT : 0;
+					}
+
+					offsetPos[direction] += backface ? 0 : VOXEL_UNIT;
 
 					p1 = model * glm::vec4(offsetPos, 1.0f);
 					p2 = model * glm::vec4(offsetPos + m, 1.0f);
 					p3 = model * glm::vec4(offsetPos + m + n, 1.0f);
 					p4 = model * glm::vec4(offsetPos + n, 1.0f);
 
-					q_p1 = { p1.x, p1.y, p1.z };
-					q_p2 = { p2.x, p2.y, p2.z };
-					q_p3 = { p3.x, p3.y, p3.z };
-					q_p4 = { p4.x, p4.y, p4.z };
+					int actualFace = getActualFace(direction, backface);
 
-					Voxel voxel = getVoxel(startPos);
-					Quad quad(q_p1, q_p2, q_p3, q_p4, voxel.type, face, voxel.transparent);
-					this->cubeRenderer.AddQuadToVBO(quad,isBackFace);
+					Quad quad(
+						glm::vec3(p1.x, p1.y, p1.z),
+						glm::vec3(p2.x, p2.y, p2.z),
+						glm::vec3(p3.x, p3.y, p3.z),
+						glm::vec3(p4.x, p4.y, p4.z),
+						startVoxel.type,
+						actualFace,
+						startVoxel.transparent
+					);
+
+					if (direction == 2) {
+						quad.RotateQuadOrder90Counter();
+						meshBuider.AddQuad(quad, quadSize[workAxis1], quadSize[workAxis2], backface);
+					}
+					else {
+						meshBuider.AddQuad(quad, quadSize[workAxis2], quadSize[workAxis1], backface);
+					}
 
 					for (int f = 0; f < quadSize[workAxis1]; f++) {
 						for (int g = 0; g < quadSize[workAxis2]; g++) {
@@ -288,179 +326,158 @@ void CubeChunk::greedy()
 					}
 				}
 			}
+			delete[] merged;
 		}
 	}
+
+	meshBuider.GenerateVBO();
 }
 
-bool CubeChunk::isVisibleQuad(int x, int y, int z,int side)
+Voxel CubeChunk::getVoxelNeighbor(glm::vec3 pos, int direction, bool backface)
 {
-	if (!this->getVoxel(x, y, z).isSolid()) return false;
-
-	if (side == FRONTSIDE) {
-		if (getVoxel(x, y, z - 1).type == AIR_BLOCK) {
-			return true;
-		}
-		else return false;
-	}
-	else if (side == BACKSIDE) {
-		if (getVoxel(x, y, z + 1).type == AIR_BLOCK) {
-			return true;
-		}
-		else return false;
-	}
-	else if (side == LEFTSIDE) {
-		if (getVoxel(x - 1, y, z).type == AIR_BLOCK) {
-			return true;
-		}
-		else return false;
-	}
-	else if (side == RIGHTSIDE) {
-		if (getVoxel(x + 1, y, z).type == AIR_BLOCK) {
-			return true;
-		}
-		else return false;
-	}
-	else if (side == TOPSIDE) {
-		if (getVoxel(x, y + 1, z).type == AIR_BLOCK) {
-			return true;
-		}
-		else return false;
-	}
-	else if (side == BOTTOMSIDE) {
-		if (getVoxel(x, y - 1, z).type == AIR_BLOCK) {
-			return true;
-		}
-		else return false;
+	if (pos[direction] < 0) {
+		pos[direction] = Dimensions[direction] + pos[direction];
 	}
 
-	return false;
+	if (pos[direction] >= Dimensions[direction]) {
+		pos[direction] = Dimensions[direction] - pos[direction];
+	}
+
+	int side = getActualFace(direction, backface);
+
+	CubeChunk* neighbor = getNeighbor(static_cast<SIDE>(side));
+
+	if (neighbor != nullptr) {
+		return neighbor->getVoxel(pos);
+	}
+
+	Voxel v(VOXEL_TRANSPARENT::TRUE, VOXEL_TYPE::AIR);
+	return v;
 }
 
-void CubeChunk::getQuad(int x, int  y, int z, int side,Quad& quad)
+CubeChunk::CubeChunk(glm::vec3 pos, glm::vec3 dimensions) : VOXEL_UNIT(1.0f)
 {
-	Voxel voxel = this->getVoxel(x, y, z);
-	quad.direction = side;
-	quad.type = voxel.type;
-	quad.transparent = voxel.transparent;
+	Dimensions = dimensions;
+	hasChanged = true;
+	hasGeneratedTerrain = false;
+	for (int i = 0; i < 6; i++) neighbors[i] = nullptr;
+	model = glm::mat4(1.0f);
+	ChunkPosition = pos;
+	model = glm::translate(model, ChunkPosition);
 }
 
-CubeChunk::CubeChunk()
-{
-	this->hasCreated = false;
+CubeChunk::CubeChunk() : VOXEL_UNIT(1.0f) {
+	Dimensions = glm::vec3(VOXEL_UNIT, VOXEL_UNIT, VOXEL_UNIT); // one cube only
+	hasChanged = true;
+	hasGeneratedTerrain = false;
+	for (int i = 0; i < 6; i++) neighbors[i] = nullptr;
+	model = glm::mat4(1.0f);
+	ChunkPosition = glm::vec3(0, 0, 0);
+	model = glm::translate(model, ChunkPosition);
 }
 
 CubeChunk::~CubeChunk()
 {
+
 }
 
-CubeChunk CubeChunk::operator=(CubeChunk& another)
+Voxel CubeChunk::getVoxel(int x, int y, int z)
 {
-	CubeChunk c;
-	for (int x = 0; x < CHUNK_SIZE; x++) {
-		for (int y = 0; y < CHUNK_SIZE; y++) {
-			for (int z = 0; z < CHUNK_SIZE; z++) {
-				Voxel v = another.getVoxel(x, y, z);
-				c.setVoxel(x, y, z, v.type, v.transparent);
-			}
+	if (hasGeneratedTerrain) {
+		if (!isContainsPosition(glm::vec3(x, y, z))) {
+			Voxel v(VOXEL_TRANSPARENT::TRUE, VOXEL_TYPE::AIR);
+			return v;
+		}
+
+		return voxels.at(FlattenIndex(glm::vec3(x,y,z)));
+	}
+	
+#ifdef DEBUG
+	cout << "The chunk has not generate terrain yet !" << endl;
+#endif // DEBUG
+
+	Voxel v(VOXEL_TRANSPARENT::TRUE, VOXEL_TYPE::AIR);
+	return v;
+}
+
+Voxel CubeChunk::getVoxel(glm::vec3 pos)
+{
+	if (hasGeneratedTerrain) {
+		if (!isContainsPosition(pos)) {
+			Voxel v(VOXEL_TRANSPARENT::TRUE, VOXEL_TYPE::AIR);
+			return v;
+		}
+
+		return voxels.at(FlattenIndex(pos));
+	}
+
+#ifdef DEBUG
+	cout << "The chunk has not generate terrain yet !" << endl;
+#endif // DEBUG
+
+	Voxel v(VOXEL_TRANSPARENT::TRUE, VOXEL_TYPE::AIR);
+	return v;
+}
+
+void CubeChunk::AddNeighbor(CubeChunk* chunk, SIDE side)
+{
+	neighbors[side] = chunk;
+}
+
+bool CubeChunk::hasNeighbor(SIDE side)
+{
+	return neighbors[side] != nullptr;
+}
+
+CubeChunk* CubeChunk::getNeighbor(SIDE side)
+{
+	return neighbors[side];
+}
+
+void CubeChunk::DoMeshing(MESHING_METHOD meshing_method)
+{
+	if (hasGeneratedTerrain) {
+		if (meshing_method == MESHING_METHOD::STUPID) {
+			stupid();
+		}
+
+		if (meshing_method == MESHING_METHOD::CULLING) {
+			culling();
+		}
+
+		if (meshing_method == MESHING_METHOD::GREEDY) {
+			greedy();
 		}
 	}
-
-	c.hasChanged = another.hasChanged;
-	c.hasCreated = another.hasCreated;
-
-	for (int side = 0; side < NUM_OF_SIDES; side++) {
-		c.AddNeighBor(another.getNeighBor(side), side);
-	}
-
-	return c;
-}
-
-void CubeChunk::Init(glm::vec3 position, int* heightmap, int c_x, int c_z)
-{
-	this->chunkPos = position;
-	this->model = glm::mat4(1.0f);
-	this->model = glm::translate(model, this->chunkPos);
-	this->CreateMesh(heightmap, c_x, c_z);
-	this->hasCreated = true;
-}
-
-void CubeChunk::Init(glm::vec3 position)
-{
-	this->chunkPos = position;
-	this->model = glm::mat4(1.0f);
-	this->model = glm::translate(model, this->chunkPos);
-	this->CreateMesh();
-	this->hasCreated = true;
-}
-
-void CubeChunk::CreateMesh(int* heightmap, int c_x, int c_z)
-{	
-	bitmap_image image("C:\\Users\\buiqu\\Downloads\\rsz_heightmap_2.bmp");
-
-	if (!image) {
-		cout << "Invalid height map";
-		return;
-	}
-
-	const unsigned int width = image.width();
-	const unsigned int height = image.height();
-
-	cout << "Height map: w: " << width << " |h: " << height << endl;
-
-	for (int x = 0; x < CHUNK_SIZE; x++) {
-		for (int y = 0; y < CHUNK_SIZE; y++) {
-			rgb_t colour;
-			image.get_pixel(x, y, colour);
-			int height = (colour.red / 255.0f) * 15;
-			if (height == 0) height = 1;
-
-			for (int z = 0; z < CHUNK_SIZE; z++) {
-				if (height > z) {
-					setBlock(glm::vec3(x, z, y), AIR_BLOCK, false);
-				}
-				else {
-					setBlock(glm::vec3(x, z, y), GRASS_BLOCK, true);
-				}
-			}
-		}
+	else {
+#ifdef DEBUG
+		cout << "The chunk has not generated terrain yet !" << endl;
+#endif // DEBUG
 	}
 }
 
-void CubeChunk::CreateMesh()
+void CubeChunk::GenerateTerrain()
 {
-	for (int x = 0; x < CHUNK_SIZE; x++) {
-		for (int y = 0; y < CHUNK_SIZE; y++) {
-			for (int z = 0; z < CHUNK_SIZE; z++) {
-				setBlock(glm::vec3(x, z, y), GRASS_BLOCK, true);
-			}
-		}
+	if (hasGeneratedTerrain == false) {
+		//MeshGenerator::GenerateShape(Dimensions, voxels, MESH_SHAPE::CUBE);
+		MeshGenerator::GenerateTerrain(Dimensions, voxels, TERRAIN_GENERATION_METHOD::PERLIN);
+		hasGeneratedTerrain = true;
 	}
-}
+	else {
+#ifdef DEBUG
+		cout << "The chunk has generated terrain already !" << endl;
+#endif // DEBUG
 
-void CubeChunk::Generate()
-{
-	this->cubeRenderer.GenerateVBO();
-	this->hasGenerated = true;	
-}
-
-void CubeChunk::DoMeshing()
-{
-	this->greedy();
-	this->cubeRenderer.isReadyToUse = true;
-	this->isReady = true;
-}
-
-void CubeChunk::AddNeighBor(CubeChunk* another, int side)
-{
-	this->neighbors[side] = another;
-}
-
-CubeChunk* CubeChunk::getNeighBor(int side)
-{
-	return this->neighbors[side];
+	}
 }
 
 void CubeChunk::Update()
 {
-	cubeRenderer.Render();
+	if (hasChanged) {
+		DoMeshing(MESHING_METHOD::GREEDY);
+		hasChanged = false;
+	}
+
+	meshBuider.Render();
 }
+

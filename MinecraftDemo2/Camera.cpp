@@ -43,7 +43,7 @@ void Camera::TurnAround(float mouseXPos, float mouseYPos)
 
 	//need to note here in notebook
 	float offsetX = mouseXPos - this->lastMouseXPos;
-	float offsetY = mouseYPos - this->lastMouseYPos;
+	float offsetY = this->lastMouseYPos - mouseYPos;
 
 	this->lastMouseXPos = mouseXPos;
 	this->lastMouseYPos = mouseYPos;

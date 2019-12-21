@@ -1,32 +1,31 @@
 #pragma once
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "GLM.h"
 #include "CubeChunk.h"
 #include <ctime>
 #include <cstdlib>
-
-#define WORLD_WIDTH 2 // 10 chunks
-#define WORLD_CHUNK_COUNT 1
+#include <unordered_map>
 
 class ChunkManager
 {
 private:
-	CubeChunk* getChunk(int x, int z);
-	CubeChunk* setChunk(int x, int z);
-	void AddNeighborsOfChunk(int x, int z);
-	CubeChunk Chunks[WORLD_CHUNK_COUNT * WORLD_CHUNK_COUNT];
-	int heightmap[WORLD_CHUNK_COUNT * CHUNK_SIZE * WORLD_CHUNK_COUNT * CHUNK_SIZE] = { 1 };
+	std::unordered_map<int, CubeChunk> map;
+	glm::vec3 Dimensions, ChunkDimensions;
+	bool hasInitialized;
 
-	void GenerateHeightMap();
+	int FlattenIndex(glm::vec3 pos);
+	bool isContainsIndex(glm::vec3 pos);
+	int getActualSide(int direction, bool backface);
 
-	int getHeightAt(int x, int z);
-	void setHeightAt(int x, int z, int height);
 public:
+	CubeChunk* getChunk(glm::vec3 pos);
+	CubeChunk* getChunk(glm::vec3 pos, int direction, bool backface);
+	void setChunk(glm::vec3 pos);
 
+	ChunkManager(glm::vec3 dimensions, glm::vec3 chunkDimensions);
 	ChunkManager();
+	~ChunkManager();
 
-	void Init();
+	void Initialize();
 	void Update();
 };
 

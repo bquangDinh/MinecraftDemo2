@@ -1,10 +1,9 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "TextureManager.h"
 #include "Game.h"
-#include "Terrain.h"
-#include <thread>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h> 
 
 using namespace std;
 
@@ -24,6 +23,8 @@ Game myGame(WIDTH, HEIGHT);
 
 int main()
 {
+	srand(time(NULL));
+
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);

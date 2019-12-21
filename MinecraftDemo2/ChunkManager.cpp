@@ -1,118 +1,156 @@
 #include "ChunkManager.h"
 
-CubeChunk* ChunkManager::getChunk(int x, int z)
+int ChunkManager::FlattenIndex(glm::vec3 pos)
 {
-	return &this->Chunks[x + WORLD_CHUNK_COUNT * z];
+	return (pos.z * Dimensions.z * Dimensions.z) + (pos.y * Dimensions.y) + pos.x;
 }
 
-CubeChunk* ChunkManager::setChunk(int x, int z)
+bool ChunkManager::isContainsIndex(glm::vec3 pos)
 {
-	CubeChunk* chunk = this->getChunk(x, z);
-	chunk->Init(glm::vec3(x * CHUNK_SIZE, 0, z * CHUNK_SIZE));
-	return chunk;
+	return pos.x >= 0 && pos.x < Dimensions.x * ChunkDimensions.x && pos.y >= 0 && pos.y < Dimensions.y * ChunkDimensions.y && pos.z >= 0 && pos.z < Dimensions.z * ChunkDimensions.z;
 }
 
-void ChunkManager::AddNeighborsOfChunk(int x, int z)
+int ChunkManager::getActualSide(int direction, bool backface)
 {
-	CubeChunk* chunk = this->getChunk(x, z);
-	for (int side = 0; side < 4; side++) {
-		if (side == FRONTSIDE) {
-			if (z < WORLD_CHUNK_COUNT - 1) {
-				if (this->getChunk(x, z + 1)->hasCreated == true) {
-					chunk->AddNeighBor(this->getChunk(x, z + 1), side);
-				}
-			}
-		}
-		if (side == BACKSIDE) {
-			if (z > 0) {
-				if (this->getChunk(x, z - 1)->hasCreated == true) {
-					chunk->AddNeighBor(this->getChunk(x, z - 1), side);
-				}
-			}
-		}
-		if (side == LEFTSIDE) {
-			if (x > 0) {
-				if (this->getChunk(x - 1, z)->hasCreated == true) {
-					chunk->AddNeighBor(this->getChunk(x - 1, z), side);
-				}
-			}
-		}
-		if (side == RIGHTSIDE) {
-			if (x < WORLD_CHUNK_COUNT - 1) {
-				if (this->getChunk(x + 1, z)->hasCreated == true) {
-					chunk->AddNeighBor(this->getChunk(x + 1, z), side);
-				}
-			}
-		}
+	if (direction == 0) {
+		//YZ plane
+		return backface ? SIDE::LEFT : SIDE::RIGHT;
 	}
-}
 
-void ChunkManager::GenerateHeightMap()
-{
-	for (int x = 0; x < WORLD_CHUNK_COUNT * CHUNK_SIZE; x++) {
-		for (int z = 0; z < WORLD_CHUNK_COUNT * CHUNK_SIZE; z++) {
-			int height = rand() % 15 + 1;
-			this->setHeightAt(x, z, height);
-		}
+	if (direction == 1) {
+		//XZ plane
+		return backface ? SIDE::BOTTOM : SIDE::TOP;
 	}
+
+	if (direction == 2) {
+		//XY plane
+		return backface ? SIDE::BACK : SIDE::FRONT;
+	}
+
+	//just make sure I return something if it goes wrong !
+	return SIDE::FRONT;
 }
 
-int ChunkManager::getHeightAt(int x, int z)
+CubeChunk* ChunkManager::getChunk(glm::vec3 pos)
 {
-	return this->heightmap[x + WORLD_CHUNK_COUNT * CHUNK_SIZE * z];
+	if (isContainsIndex(pos)) {
+		return &map.at(FlattenIndex(pos));
+	}
+	return nullptr;
 }
 
-void ChunkManager::setHeightAt(int x, int z, int height)
+CubeChunk* ChunkManager::getChunk(glm::vec3 pos, int direction, bool backface)
 {
-	this->heightmap[x + WORLD_CHUNK_COUNT * CHUNK_SIZE * z] = height;
+	pos[direction] += backface ? ChunkDimensions[direction] * (-1) : ChunkDimensions[direction];
+	return getChunk(pos);
 }
 
+ChunkManager::ChunkManager(glm::vec3 dimensions, glm::vec3 chunkDimensions)
+{
+	Dimensions = dimensions;
+	ChunkDimensions = chunkDimensions;
+	hasInitialized = false;
+}
 
 ChunkManager::ChunkManager()
 {
-	srand(time(0));
+	Dimensions = glm::vec3(1, 1, 1);
+	ChunkDimensions = glm::vec3(1, 1, 1);
+	hasInitialized = false;
 }
 
-void ChunkManager::Init()
+ChunkManager::~ChunkManager()
 {
-	//this->GenerateHeightMap();
+}
 
-	for (int x = 0; x < WORLD_CHUNK_COUNT; x++) {
-		for (int z = 0; z < WORLD_CHUNK_COUNT; z++) {
-			this->setChunk(x, z);
+void ChunkManager::Initialize()
+{
+	if (!hasInitialized) {
+#ifdef DEBUG
+		cout << "Chunk Manager [Dimensions]: " << Dimensions.x << " " << Dimensions.y << " " << Dimensions.z << endl;
+		cout << "Chunk [Dimensions]: " << ChunkDimensions.x << " " << ChunkDimensions.y << " " << ChunkDimensions.z << endl;
+		cout << "Loading Chunk ..." << endl;
+#endif // DEBUG
+
+		for (int x = 0; x < Dimensions.x * ChunkDimensions.x; x += ChunkDimensions.x) {
+			for (int y = 0; y < Dimensions.y * ChunkDimensions.y; y += ChunkDimensions.y) {
+				for (int z = 0; z < Dimensions.z * ChunkDimensions.z; z += ChunkDimensions.z) {
+					//cout << "x: " << x << " |y: " << y << " |z: " << z << endl;
+					CubeChunk chunk(glm::vec3(x,y,z), ChunkDimensions);
+					map.insert(std::pair<int, CubeChunk>(FlattenIndex(glm::vec3(x,y,z)), chunk));
+				}
+			}
 		}
+
+#ifdef DEBUG
+		cout << "Linking Chunk ..." << endl;
+#endif // DEBUG
+
+		int direction, workAxis1, workAxis2;
+		bool backface;
+		glm::vec3 startPos;
+
+		for (int side = 0; side < NUM_OF_SIDES; ++side) {
+			backface = side % 2 == 0 ? false : true;
+			direction = side % 3;
+			workAxis1 = (direction + 1) % 3;
+			workAxis2 = (direction + 2) % 3;
+
+			for (startPos[direction] = 0; startPos[direction] < Dimensions[direction] * ChunkDimensions[direction]; startPos[direction] += ChunkDimensions[direction]) {
+				for (startPos[workAxis1] = 0; startPos[workAxis1] < Dimensions[workAxis1] * ChunkDimensions[workAxis1]; startPos[workAxis1] += ChunkDimensions[workAxis1]) {
+					for (startPos[workAxis2] = 0; startPos[workAxis2] < Dimensions[workAxis2] * ChunkDimensions[workAxis2]; startPos[workAxis2] += ChunkDimensions[workAxis2]) {
+						CubeChunk* chunk = getChunk(startPos);
+
+						int actualSide = getActualSide(direction, backface);
+
+						if (chunk->hasNeighbor(static_cast<SIDE>(actualSide))) continue;
+
+						CubeChunk* chunkNeighbor = getChunk(startPos, direction, backface);
+
+						if (chunkNeighbor == nullptr) continue;
+
+						chunk->AddNeighbor(chunkNeighbor, static_cast<SIDE>(actualSide));
+					}
+				}
+			}
+		}
+
+#ifdef DEBUG
+		cout << "Generating Chunk ..." << endl;
+#endif // DEBUG
+
+		for (int x = 0; x < Dimensions.x * ChunkDimensions.x; x += ChunkDimensions.x) {
+			for (int y = 0; y < Dimensions.y * ChunkDimensions.y; y += ChunkDimensions.y) {
+				for (int z = 0; z < Dimensions.z * ChunkDimensions.z; z += ChunkDimensions.z) {
+					CubeChunk* chunk = getChunk(glm::vec3(x, y, z));
+					chunk->GenerateTerrain();
+				}
+			}
+		}
+
+#ifdef DEBUG
+		cout << "Chunk count: " << map.size() << endl;
+#endif // DEBUG
+
+		hasInitialized = true;
 	}
-
-	cout << "NB process" << endl;
-
-	for (int x = 0; x < WORLD_CHUNK_COUNT; x++) {
-		for (int z = 0; z < WORLD_CHUNK_COUNT; z++) {
-			this->AddNeighborsOfChunk(x, z);
-		}
-	}
-
-	cout << "Meshing..." << endl;
-
-	for (int x = 0; x < WORLD_CHUNK_COUNT; x++) {
-		for (int z = 0; z < WORLD_CHUNK_COUNT; z++) {
-			this->getChunk(x, z)->DoMeshing();
-		}
-	}
-
-	cout << "Generating..." << endl;
-
-	for (int x = 0; x < WORLD_CHUNK_COUNT; x++) {
-		for (int z = 0; z < WORLD_CHUNK_COUNT; z++) {
-			this->getChunk(x, z)->Generate();
-		}
+	else {
+#ifdef DEBUG
+		cout << "The chunk manager has initialized already !" << endl;
+#endif // DEBUG
 	}
 }
 
 void ChunkManager::Update()
 {
-	for (int x = 0; x < WORLD_CHUNK_COUNT; x++) {
-		for (int z = 0; z < WORLD_CHUNK_COUNT; z++) {
-			this->getChunk(x, z)->Update();
+	if (hasInitialized) {
+		for (int x = 0; x < Dimensions.x * ChunkDimensions.x; x += ChunkDimensions.x) {
+			for (int y = 0; y < Dimensions.y * ChunkDimensions.y; y += ChunkDimensions.y) {
+				for (int z = 0; z < Dimensions.z * ChunkDimensions.z; z += ChunkDimensions.z) {
+					CubeChunk* chunk = getChunk(glm::vec3(x, y, z));
+					chunk->Update();
+				}
+			}
 		}
 	}
 }

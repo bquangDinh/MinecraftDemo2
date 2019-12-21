@@ -1,7 +1,16 @@
 #include "Game.h"
 
-Game::Game(GLuint, GLuint)
+Game::Game(GLuint width, GLuint height)
 {
+	Width = width;
+	Height = Height;
+	currentState = GameState::RUNNING;
+	chunkManager = new ChunkManager(glm::vec3(10, 1, 10), glm::vec3(16, 16, 16));
+	if (chunkManager == nullptr) {
+#ifdef DEBUG
+		cout << "Cannot create a new Chunk Manager. Something goes wrong !!!" << endl;
+#endif // DEBUG
+	}
 }
 
 Game::~Game()
@@ -13,23 +22,36 @@ void Game::Init()
 	double firstTime = glfwGetTime();
 	cout << "Initialize..." << endl;
 
+#ifdef ENABLE_DEPTH_TEST
 	glEnable(GL_DEPTH_TEST);
+#endif
+
+#ifdef ENABLE_CULLING_MODE
+	glEnable(GL_CULL_FACE);
+#endif
+
 	glEnable(GL_CULL_FACE);
 
 #ifdef WIREFRAME_DEBUG
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-#endif // WIREFRAME_DEBUG
+#endif
 
 	//load everything (texture, shader .v.v)
-	TexturePiece grass_side = { "grass_side",12,15 };
-	TexturePiece grass_top = { "grass_top",7,13 };
-	TexturePiece grass_bottom = { "grass_bottom",13,15 };
+
+	/*
+	TexturePiece grass_side = { GRASS_SIDE_TEXTURE,12,15 };
+	TexturePiece grass_top = { GRASS_TOP_TEXTURE,7,13 };
+	TexturePiece grass_bottom = { GRASS_BOTTOM_TEXTURE,13,15 };
 	TexturePiece rock = { "rock",14,15 };
 	TexturePiece pieces[] = { grass_side,grass_top,grass_bottom,rock };
 	TextureManager::LoadTextureCoordAtlas("C:\\Users\\buiqu\\Downloads\\assets\\textures\\imageedit_2_3831088975.png", 15, 15, "texture_atlas", pieces, 4);
 	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
+	*/
+	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
+	
+	TextureManager::LoadTextureArray("C:\\Users\\buiqu\\Downloads\\assets\\textures\\T5XQv5z.png", true, "texture_array");
 
-	chunkManager.Init();
+	chunkManager->Initialize();
 
 	double lastTime = glfwGetTime();
 	cout << "Done !" << endl;
@@ -80,7 +102,7 @@ void Game::Render()
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("projection", projection);
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("view", mainCamera.getViewMatrix());
 
-	chunkManager.Update();
+	chunkManager->Update();
 }
 
 void Game::ViewRender()
