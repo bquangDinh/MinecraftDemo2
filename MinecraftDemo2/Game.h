@@ -3,10 +3,13 @@
 #include <GLFW/glfw3.h>
 #include "TextureManager.h"
 #include "ShaderManager.h"
-#include "CubeRenderer.h"
 #include "Camera.h"
 #include "ChunkManager.h"
 #include <string>
+#include "CubeUtils.h"
+#include "LightingManager.h"
+#include "Shadow.h"
+#include "MeshBuilder.h"
 
 //#define WIREFRAME_DEBUG
 #define ENABLE_CULLING_MODE
@@ -25,6 +28,8 @@ public:
 	GLuint Width, Height;
 	Camera mainCamera;
 	ChunkManager* chunkManager;
+	Shadow* shadow;
+	LightingManager* lightingManager;
 	Game(GLuint width, GLuint height);
 	~Game();
 

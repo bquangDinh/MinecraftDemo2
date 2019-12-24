@@ -43,6 +43,7 @@ private:
 public: 
 	bool hasChanged;
 	bool hasGeneratedTerrain;
+	bool firstMeshing;
 
 	CubeChunk(glm::vec3 pos, glm::vec3 dimensions);
 	CubeChunk();

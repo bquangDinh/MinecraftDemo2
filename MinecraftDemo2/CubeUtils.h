@@ -33,6 +33,7 @@ enum DIRECTION {
 enum VOXEL_TYPE {
 	AIR,
 	GRASS,
+	DIRT,
 	ROCK
 };
 

@@ -5,10 +5,19 @@ Game::Game(GLuint width, GLuint height)
 	Width = width;
 	Height = Height;
 	currentState = GameState::RUNNING;
-	chunkManager = new ChunkManager(glm::vec3(10, 1, 10), glm::vec3(16, 16, 16));
+	chunkManager = new ChunkManager(glm::vec3(10, 1, 10), glm::vec3(16, 32, 16));
+	lightingManager = new LightingManager();
+	shadow = new Shadow();
+
 	if (chunkManager == nullptr) {
 #ifdef DEBUG
 		cout << "Cannot create a new Chunk Manager. Something goes wrong !!!" << endl;
+#endif // DEBUG
+	}
+
+	if (lightingManager == nullptr) {
+#ifdef DEBUG
+		cout << "Cannot create a new Lighting Manager. Something goes wrong !!!" << endl;
 #endif // DEBUG
 	}
 }
@@ -38,20 +47,14 @@ void Game::Init()
 
 	//load everything (texture, shader .v.v)
 
-	/*
-	TexturePiece grass_side = { GRASS_SIDE_TEXTURE,12,15 };
-	TexturePiece grass_top = { GRASS_TOP_TEXTURE,7,13 };
-	TexturePiece grass_bottom = { GRASS_BOTTOM_TEXTURE,13,15 };
-	TexturePiece rock = { "rock",14,15 };
-	TexturePiece pieces[] = { grass_side,grass_top,grass_bottom,rock };
-	TextureManager::LoadTextureCoordAtlas("C:\\Users\\buiqu\\Downloads\\assets\\textures\\imageedit_2_3831088975.png", 15, 15, "texture_atlas", pieces, 4);
 	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
-	*/
-	ShaderManager::LoadShaderProgram("vertexShader.vert", "fragmentShader.frag", "shader_program");
-	
+	ShaderManager::LoadShaderProgram("ShadowVertexShader.vert", "ShadowFragmentShader.frag", "shadow_shader_program");
+
 	TextureManager::LoadTextureArray("C:\\Users\\buiqu\\Downloads\\assets\\textures\\T5XQv5z.png", true, "texture_array");
 
 	chunkManager->Initialize();
+	lightingManager->Initialize(0.2f, glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(32.0f, 25.7f, 60.5f));
+	shadow->Initialize();
 
 	double lastTime = glfwGetTime();
 	cout << "Done !" << endl;
@@ -95,13 +98,47 @@ void Game::Render()
 	glClearColor(0.2f, 0.6f, 0.85f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	//lightingManager->lightPos = mainCamera.cameraPos;
+	//cout << "x: " << mainCamera.cameraPos.x << " y: " << mainCamera.cameraPos.y << " z: " << mainCamera.cameraPos.z << endl;
+
+	ShaderManager::GetShaderProgram("shader_program").Use();
+
+	lightingManager->Update(glfwGetTime());
+
+	//shadow here
+	glCullFace(GL_FRONT);
+	ShaderManager::GetShaderProgram("shadow_shader_program").Use();
+	ShaderManager::GetShaderProgram("shadow_shader_program").SetMatrix4("lightSpaceMatrix", lightingManager->getLightSpaceMatrix());
+	
+	MeshBuilder::shader = "shadow_shader_program";
+
+	glBindFramebuffer(GL_FRAMEBUFFER, shadow->FBO);
+	shadow->shadowMap->Bind();
+
+	//first Meshing
+	chunkManager->Update();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	MeshBuilder::shader = "shader_program";
+
+	//render as usual here
+	glCullFace(GL_BACK);
+	ShaderManager::GetShaderProgram("shader_program").Use();
+
+	glActiveTexture(GL_TEXTURE1);
+	shadow->shadowMap->Bind();
+	glActiveTexture(GL_TEXTURE0);
+
 	//adjust camer
 	glm::mat4 projection = glm::mat4(1.0f);
 	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 200.0f);
 
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("projection", projection);
+	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("lightSpaceMatrix", lightingManager->getLightSpaceMatrix());
 	ShaderManager::GetShaderProgram("shader_program").SetMatrix4("view", mainCamera.getViewMatrix());
 
+	lightingManager->Update(glfwGetTime());
+	
 	chunkManager->Update();
 }
 

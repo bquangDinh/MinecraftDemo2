@@ -10,7 +10,11 @@ public:
 
 	Voxel();
 	Voxel(bool, int);
-	
+	~Voxel();
+
+	//copy-constructor
+	Voxel& operator=(const Voxel& v);
+
 	bool equals(Voxel);
 	bool isSolid();
 };

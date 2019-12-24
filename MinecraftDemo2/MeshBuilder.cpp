@@ -1,5 +1,7 @@
 #include "MeshBuilder.h"
 
+std::string MeshBuilder::shader = "shader_program";
+
 MeshBuilder::MeshBuilder()
 {
 	faceCount = 0;
@@ -30,6 +32,8 @@ void MeshBuilder::AddQuad(Quad quad, int width, int height, bool backface)
 
 	addIndicates(backface, faceCount);
 
+	glm::vec3 normal = quad.getNormalVector();
+
 	int textureIndex = getTextureIndex(quad.getType(), quad.getFace());
 
 #ifdef DEBUG
@@ -37,18 +41,22 @@ void MeshBuilder::AddQuad(Quad quad, int width, int height, bool backface)
 #endif // DEBUG
 
 	addPointV3(quad.p1);
+	addPointV3(normal);
 	addPointV2(glm::vec2(1.0f + width, 1.0f + height));
 	addPointV2(glm::vec2(textureIndex, textureIndex));
 
 	addPointV3(quad.p2);
+	addPointV3(normal);
 	addPointV2(glm::vec2(1.0f + width, 0.0f));
 	addPointV2(glm::vec2(textureIndex, textureIndex));
 
 	addPointV3(quad.p3);
+	addPointV3(normal);
 	addPointV2(glm::vec2(0.0f, 0.0f));
 	addPointV2(glm::vec2(textureIndex, textureIndex));
 
 	addPointV3(quad.p4);
+	addPointV3(normal);
 	addPointV2(glm::vec2(0.0f, 1.0f + height));
 	addPointV2(glm::vec2(textureIndex, textureIndex));
 
@@ -75,15 +83,19 @@ void MeshBuilder::GenerateVBO()
 
 		//for position
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)0);
+
+		//for normal vector
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(3 * sizeof(float)));
 
 		//for uv
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(6 * sizeof(float)));
 
 		//for texture index
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 7 * sizeof(float), (void*)(5 * sizeof(float)));
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 10 * sizeof(float), (void*)(8 * sizeof(float)));
 
 		readyToRender = true;
 
@@ -104,8 +116,10 @@ void MeshBuilder::Render()
 {
 	if (readyToRender) {
 		//render
-		TextureManager::GetTextureArray("texture_array").Bind();
-		ShaderManager::GetShaderProgram("shader_program").Use();
+		if (shader == "shader_program") {
+			TextureManager::GetTextureArray("texture_array").Bind();
+		}
+		ShaderManager::GetShaderProgram(shader).Use();
 		glBindVertexArray(this->VAO);
 		glDrawElements(GL_TRIANGLES, this->indicates.size(), GL_UNSIGNED_INT, (void*)0);
 	}
@@ -152,6 +166,7 @@ void MeshBuilder::addIndicates(bool backface, int offset)
 int MeshBuilder::getTextureIndex(int type, int face)
 {
 	if (type == VOXEL_TYPE::GRASS) {
+
 		if (face == SIDE::TOP) {
 			return 0;
 		}
@@ -163,7 +178,15 @@ int MeshBuilder::getTextureIndex(int type, int face)
 		}
 	}
 
-	return 0;
+	if (type == VOXEL_TYPE::DIRT) {
+		return 2;
+	}
+
+	if (type == VOXEL_TYPE::ROCK) {
+		return 1;
+	}
+
+	return 2;
 }
 
 void MeshBuilder::printReport()

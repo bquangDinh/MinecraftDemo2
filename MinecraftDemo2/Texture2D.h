@@ -11,6 +11,7 @@ public:
 	GLuint Wrap_S, Wrap_T, Wrap_R;
 	GLuint Filter_Min, Filter_Max;
 	GLuint Width, Height;
+	GLuint Data_Type;
 
 	Texture2D();
 

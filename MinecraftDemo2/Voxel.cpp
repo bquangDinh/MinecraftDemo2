@@ -12,6 +12,17 @@ Voxel::Voxel(bool transparent, int type)
 	this->type = type;
 }
 
+Voxel::~Voxel()
+{
+}
+
+Voxel& Voxel::operator=(const Voxel& v)
+{
+	transparent = v.transparent;
+	type = v.type;
+	return *this;
+}
+
 bool Voxel::equals(Voxel another)
 {
 	if (this->transparent == another.transparent && this->type == another.type) return true;

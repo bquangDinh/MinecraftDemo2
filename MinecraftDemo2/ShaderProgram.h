@@ -21,5 +21,7 @@ public:
 	//Set value
 	void SetMatrix4(const char* name, glm::mat4 matrix);
 	void SetVector2(const char* name, glm::vec2 vec2);
+	void SetVector3(const char* name, glm::vec3 vec3);
+	void SetFloat(const char* name, float value);
 };
 

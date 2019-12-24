@@ -22,6 +22,8 @@ public:
 
 	void RotateQuadOrder90();
 	void RotateQuadOrder90Counter();
+	glm::vec3 getNormalVector();
+
 
 	static void RolateQuadOrder90(glm::vec4&, glm::vec4&, glm::vec4&, glm::vec4&);
 	static void RolateQuadOrder90Counter(glm::vec4&, glm::vec4&, glm::vec4&, glm::vec4&);

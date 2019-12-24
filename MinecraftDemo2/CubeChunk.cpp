@@ -18,7 +18,8 @@ void CubeChunk::setDimensions(glm::vec3 dimensions)
 
 int CubeChunk::FlattenIndex(glm::vec3 pos)
 {
-	return (pos.z * Dimensions.z * Dimensions.z) + (pos.y * Dimensions.y) + pos.x;
+	//return (pos.z * Dimensions.z * Dimensions.z) + (pos.y * Dimensions.y) + pos.x;
+	return pos.z + Dimensions.z * (pos.y + Dimensions.y * pos.x);
 }
 
 bool CubeChunk::isContainsPosition(glm::vec3 pos)
@@ -243,16 +244,16 @@ void CubeChunk::greedy()
 		startPos = glm::vec3();
 		currPos = glm::vec3();
 
-		for (startPos[direction] = 0; startPos[direction] < Dimensions.x; startPos[direction]++) {
+		for (startPos[direction] = 0; startPos[direction] < Dimensions[direction]; startPos[direction]++) {
 			
 			bool** merged = new bool* [Dimensions[workAxis1]];
 			for (int i = 0; i < Dimensions[workAxis1]; ++i) {
 				merged[i] = new bool[Dimensions[workAxis2]];
-				memset(merged[i], false, Dimensions[workAxis1] * sizeof(bool));
+				memset(merged[i], false, Dimensions[workAxis2] * sizeof(bool));
 			}
 
-			for (startPos[workAxis1] = 0; startPos[workAxis1] < Dimensions.y; startPos[workAxis1]++) {
-				for (startPos[workAxis2] = 0; startPos[workAxis2] < Dimensions.z; startPos[workAxis2]++) {
+			for (startPos[workAxis1] = 0; startPos[workAxis1] < Dimensions[workAxis1]; startPos[workAxis1]++) {
+				for (startPos[workAxis2] = 0; startPos[workAxis2] < Dimensions[workAxis2]; startPos[workAxis2]++) {
 					Voxel startVoxel = this->getVoxel(startPos);
 
 					if (merged[(int)startPos[workAxis1]][(int)startPos[workAxis2]] == true || !startVoxel.isSolid() || !isBlockFaceVisible(startPos, direction, backface)) {
@@ -319,8 +320,8 @@ void CubeChunk::greedy()
 						meshBuider.AddQuad(quad, quadSize[workAxis2], quadSize[workAxis1], backface);
 					}
 
-					for (int f = 0; f < quadSize[workAxis1]; f++) {
-						for (int g = 0; g < quadSize[workAxis2]; g++) {
+					for (int f = 0; f < quadSize[workAxis1]; ++f) {
+						for (int g = 0; g < quadSize[workAxis2]; ++g) {
 							merged[(int)startPos[workAxis1] + f][(int)startPos[workAxis2] + g] = true;
 						}
 					}
@@ -360,6 +361,7 @@ CubeChunk::CubeChunk(glm::vec3 pos, glm::vec3 dimensions) : VOXEL_UNIT(1.0f)
 	Dimensions = dimensions;
 	hasChanged = true;
 	hasGeneratedTerrain = false;
+	firstMeshing = false;
 	for (int i = 0; i < 6; i++) neighbors[i] = nullptr;
 	model = glm::mat4(1.0f);
 	ChunkPosition = pos;
@@ -370,6 +372,7 @@ CubeChunk::CubeChunk() : VOXEL_UNIT(1.0f) {
 	Dimensions = glm::vec3(VOXEL_UNIT, VOXEL_UNIT, VOXEL_UNIT); // one cube only
 	hasChanged = true;
 	hasGeneratedTerrain = false;
+	firstMeshing = false;
 	for (int i = 0; i < 6; i++) neighbors[i] = nullptr;
 	model = glm::mat4(1.0f);
 	ChunkPosition = glm::vec3(0, 0, 0);
@@ -480,4 +483,5 @@ void CubeChunk::Update()
 
 	meshBuider.Render();
 }
+
 

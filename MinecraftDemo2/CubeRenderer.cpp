@@ -1,5 +1,7 @@
 #include "CubeRenderer.h"
-	
+
+std::string CubeRenderer::shader = "shader_program";
+
 CubeRenderer::CubeRenderer()
 {
 }
@@ -139,7 +141,7 @@ void CubeRenderer::GenerateVAO()
 void CubeRenderer::Render()
 {
 	TextureManager::GetTextureArray("texture_array").Bind();
-	ShaderManager::GetShaderProgram("shader_program").Use();
+	ShaderManager::GetShaderProgram(CubeRenderer::shader).Use();
 	glBindVertexArray(this->VAO);
 	glDrawElements(GL_TRIANGLES, this->indicates.size(), GL_UNSIGNED_INT, (void*)0);
 }
