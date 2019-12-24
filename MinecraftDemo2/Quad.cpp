@@ -66,6 +66,15 @@ void Quad::RotateQuadOrder90Counter()
 	p4 = t1;
 }
 
+glm::vec3 Quad::getNormalVector()
+{
+	bool backface = face % 2 == 0 ? false : true;
+	int direction = face % 3;
+	glm::vec3 normal = glm::vec3(0, 0, 0);
+	normal[direction] = backface ? -1.0f : 1.0f;
+	return normal;
+}
+
 void Quad::RolateQuadOrder90(glm::vec4& p1, glm::vec4& p2, glm::vec4& p3, glm::vec4& p4)
 {
 	glm::vec4 t1, t2, t3;

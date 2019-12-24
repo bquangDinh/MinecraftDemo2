@@ -6,10 +6,13 @@
 #include "Quad.h"
 #include <vector>
 #include "GLM.h"
+#include <string>
 
 class MeshBuilder
 {
 public:
+	static std::string shader;
+
 	MeshBuilder();
 	~MeshBuilder();
 

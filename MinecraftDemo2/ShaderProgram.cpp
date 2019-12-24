@@ -100,8 +100,20 @@ void ShaderProgram::SetMatrix4(const char* name, glm::mat4 matrix)
 
 void ShaderProgram::SetVector2(const char* name, glm::vec2 vec2)
 {
-	unsigned int location = glGetUniformLocation(this->ID, "texCoord");
+	unsigned int location = glGetUniformLocation(this->ID, name);
 	glUniform2f(location, vec2.x, vec2.y);
+}
+
+void ShaderProgram::SetVector3(const char* name, glm::vec3 vec3)
+{
+	unsigned int location = glGetUniformLocation(this->ID, name);
+	glUniform3f(location, vec3.x, vec3.y, vec3.z);
+}
+
+void ShaderProgram::SetFloat(const char* name, float value)
+{
+	unsigned int location = glGetUniformLocation(this->ID, name);
+	glUniform1f(location, value);
 }
 
 

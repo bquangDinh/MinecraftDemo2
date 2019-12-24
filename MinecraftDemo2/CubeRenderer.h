@@ -5,14 +5,13 @@
 #include "CubeUtils.h"
 #include "Quad.h"
 #include <vector>
-
-typedef struct {
-	float x, y, z;
-} Vertex;
+#include <string>
 
 class CubeRenderer
 {
 public:
+	static std::string shader;
+
 	bool isReadyToUse = false;
 	CubeRenderer();
 	~CubeRenderer();

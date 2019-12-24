@@ -163,6 +163,8 @@
     <ClCompile Include="CubeRenderer.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="HeightMap.cpp" />
+    <ClCompile Include="LightingManager.cpp" />
     <ClCompile Include="Mathf.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MeshBuilder.cpp" />
@@ -172,6 +174,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
+    <ClCompile Include="Shadow.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClCompile Include="Texture2DArray.cpp" />
@@ -190,6 +193,8 @@
     <ClInclude Include="File.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GLM.h" />
+    <ClInclude Include="HeightMap.h" />
+    <ClInclude Include="LightingManager.h" />
     <ClInclude Include="Mathf.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="Mesh.h" />
@@ -199,6 +204,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ShaderProgram.h" />
+    <ClInclude Include="Shadow.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture2D.h" />
@@ -209,6 +215,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fragmentShader.frag" />
+    <None Include="ShadowFragmentShader.frag" />
+    <None Include="ShadowVertexShader.vert" />
     <None Include="vertexShader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

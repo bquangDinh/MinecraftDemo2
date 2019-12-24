@@ -2,7 +2,8 @@
 
 int ChunkManager::FlattenIndex(glm::vec3 pos)
 {
-	return (pos.z * Dimensions.z * Dimensions.z) + (pos.y * Dimensions.y) + pos.x;
+	//return (pos.z * Dimensions.z * Dimensions.z) + (pos.y * Dimensions.y) + pos.x;
+	return pos.z + Dimensions.z * (pos.y + Dimensions.y * pos.x);
 }
 
 bool ChunkManager::isContainsIndex(glm::vec3 pos)
@@ -154,3 +155,4 @@ void ChunkManager::Update()
 		}
 	}
 }
+
